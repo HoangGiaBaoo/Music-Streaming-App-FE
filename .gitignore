@@ -1,0 +1,24 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Claude-specific & training/reference files (not needed to run the project)
+.claude/
+.giaodien_pages/
+docs/
+memory/
+ANDROID_CHUCNANG1.md
+ANDROID_INTEGRATION.md
+CLAUDE.md

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Spotify Dark Theme -->
+    <color name="bg_primary">#121212</color>
+    <color name="bg_secondary">#1E1E1E</color>
+    <color name="bg_elevated">#282828</color>
+
+    <color name="spotify_green">#1DB954</color>
+    <color name="accent_white">#FFFFFF</color>
+    <color name="text_secondary">#B3B3B3</color>
+    <color name="text_disabled">#535353</color>
+
+    <color name="liked_red">#E91429</color>
+    <color name="progress_bg">#535353</color>
+
+    <color name="placeholder_start">#6A1B9A</color>
+    <color name="placeholder_end">#E91E8C</color>
+
+    <color name="chip_active">#1DB954</color>
+    <color name="chip_idle">#282828</color>
+
+    <color name="avatar_orange">#E07F2F</color>
+    <color name="badge_green_bg">#1DB954</color>
+
+    <!-- Drawer / surfaces -->
+    <color name="surface_dark">#1A1A1A</color>
+    <color name="divider">#2A2A2A</color>
+    <color name="outline_grey">#535353</color>
+</resources>

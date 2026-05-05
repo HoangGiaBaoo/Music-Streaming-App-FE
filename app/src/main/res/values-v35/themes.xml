@@ -1,0 +1,19 @@
+<resources>
+    <!-- Android 15+ enforces edge-to-edge by default. Opt out so status/nav bars
+         keep insets and content does not slide under them. -->
+    <style name="Theme.MusicStreamingApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/spotify_green</item>
+        <item name="colorPrimaryDark">@color/bg_primary</item>
+        <item name="colorAccent">@color/spotify_green</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_elevated</item>
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+        <item name="bottomNavigationStyle">@style/BottomNavStyle</item>
+    </style>
+</resources>

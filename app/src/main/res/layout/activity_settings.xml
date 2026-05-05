@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_primary"
+    android:fitsSystemWindows="true">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/bg_primary"
+        android:title="@string/drawer_settings"
+        android:titleTextColor="@color/accent_white"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/accent_white"
+        xmlns:app="http://schemas.android.com/apk/res-auto"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
+
+            <LinearLayout
+                android:id="@+id/row_account"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_account"/>
+                <TextView
+                    android:id="@+id/sub_account"
+                    style="@style/SettingsRowSubtitle"
+                    android:text="—"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_content_display"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_content_display"/>
+                <TextView
+                    style="@style/SettingsRowSubtitle"
+                    android:text="@string/settings_content_display_sub"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_privacy"
+                style="@style/SettingsRow">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/SettingsRowTitle"
+                        android:text="@string/settings_privacy"/>
+                    <TextView
+                        style="@style/SettingsRowSubtitle"
+                        android:text="@string/settings_privacy_sub"/>
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/sw_private_session"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_playback"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_playback"/>
+                <TextView
+                    style="@style/SettingsRowSubtitle"
+                    android:text="@string/settings_playback_sub"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_notifications"
+                style="@style/SettingsRow">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/SettingsRowTitle"
+                        android:text="@string/settings_notifications"/>
+                    <TextView
+                        style="@style/SettingsRowSubtitle"
+                        android:text="@string/settings_notifications_sub"/>
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/sw_push_notifications"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_devices"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_devices"/>
+                <TextView
+                    style="@style/SettingsRowSubtitle"
+                    android:text="@string/settings_devices_sub"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_data"
+                style="@style/SettingsRow">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/SettingsRowTitle"
+                        android:text="@string/settings_data"/>
+                    <TextView
+                        style="@style/SettingsRowSubtitle"
+                        android:text="@string/settings_data_sub"/>
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/sw_data_saver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_quality"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_quality"/>
+                <TextView
+                    android:id="@+id/sub_quality"
+                    style="@style/SettingsRowSubtitle"
+                    android:text="AUTO"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_ads"
+                style="@style/SettingsRow">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/SettingsRowTitle"
+                        android:text="@string/settings_ads"/>
+                    <TextView
+                        style="@style/SettingsRowSubtitle"
+                        android:text="@string/settings_ads_sub"/>
+                </LinearLayout>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/sw_personalized_ads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/row_about"
+                style="@style/SettingsRow"
+                android:orientation="vertical">
+                <TextView
+                    style="@style/SettingsRowTitle"
+                    android:text="@string/settings_about"/>
+                <TextView
+                    style="@style/SettingsRowSubtitle"
+                    android:text="@string/settings_about_sub"/>
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="24dp"
+                android:paddingHorizontal="32dp"
+                android:text="@string/settings_logout"
+                android:textColor="@color/accent_white"
+                app:strokeColor="@color/outline_grey"
+                app:cornerRadius="22dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

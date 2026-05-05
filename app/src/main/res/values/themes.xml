@@ -1,0 +1,101 @@
+<resources>
+    <style name="Theme.MusicStreamingApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/spotify_green</item>
+        <item name="colorPrimaryDark">@color/bg_primary</item>
+        <item name="colorAccent">@color/spotify_green</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_elevated</item>
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+        <item name="bottomNavigationStyle">@style/BottomNavStyle</item>
+    </style>
+
+    <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="android:background">@color/bg_elevated</item>
+        <item name="itemIconTint">@color/bottom_nav_tint</item>
+        <item name="itemTextColor">@color/bottom_nav_tint</item>
+    </style>
+
+    <style name="CollapsingToolbarStyle" parent="Widget.MaterialComponents.CollapsingToolbar">
+        <item name="expandedTitleTextAppearance">@style/ExpandedTitleStyle</item>
+    </style>
+
+    <style name="ExpandedTitleStyle" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AlertDialogDark" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="colorSurface">@color/bg_elevated</item>
+        <item name="colorOnSurface">@color/accent_white</item>
+        <item name="android:textColorPrimary">@color/accent_white</item>
+        <item name="colorAccent">@color/spotify_green</item>
+    </style>
+
+    <style name="DrawerRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="DrawerRowIcon">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:tint">@color/accent_white</item>
+    </style>
+
+    <style name="DrawerRowText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="SettingsRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">14dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="SettingsRowTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="SettingsRowSubtitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_marginTop">2dp</item>
+    </style>
+
+    <style name="RecentChip">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:paddingHorizontal">14dp</item>
+        <item name="android:paddingVertical">6dp</item>
+        <item name="android:background">@drawable/bg_chip_idle</item>
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+</resources>

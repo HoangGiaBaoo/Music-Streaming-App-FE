@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="180dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="14dp"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:background="@drawable/bg_card_top50">
+
+        <TextView
+            android:id="@+id/tv_chart_title_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="16dp"
+            android:text="Top 50"
+            android:textColor="@color/accent_white"
+            android:textSize="22sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tv_chart_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="16dp"
+            android:text="VIETNAM"
+            android:textColor="@color/accent_white"
+            android:textSize="13sp"
+            android:textStyle="bold"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_chart_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:text="Thông tin cập nhật hàng ngày về những bản nhạc đ…"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"/>
+</LinearLayout>

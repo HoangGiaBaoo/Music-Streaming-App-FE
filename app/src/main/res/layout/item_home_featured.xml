@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="14dp"
+    android:background="@drawable/bg_card_dark"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/iv_featured_cover"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/placeholder_gradient"
+        android:scaleType="centerCrop"/>
+
+    <TextView
+        android:id="@+id/tv_featured_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_weight="1"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:text="TAYLOR SWIFT: TOP 50 SONGS"
+        android:textColor="@color/accent_white"
+        android:textSize="13sp"
+        android:textStyle="bold"/>
+
+    <ImageButton
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_more_vert"
+        android:tint="@color/accent_white"/>
+</LinearLayout>

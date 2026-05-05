@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="track_card_size">160dp</dimen>
+    <dimen name="track_card_cover_size">160dp</dimen>
+    <dimen name="artist_card_size">120dp</dimen>
+    <dimen name="track_list_cover">56dp</dimen>
+    <dimen name="playlist_cover">56dp</dimen>
+    <dimen name="mini_player_height">72dp</dimen>
+    <dimen name="mini_player_cover">48dp</dimen>
+    <dimen name="section_padding">16dp</dimen>
+    <dimen name="section_title_size">18sp</dimen>
+    <dimen name="track_title_size">16sp</dimen>
+    <dimen name="track_artist_size">13sp</dimen>
+    <dimen name="greeting_size">22sp</dimen>
+    <dimen name="button_radius">24dp</dimen>
+    <dimen name="card_radius">4dp</dimen>
+    <dimen name="player_cover_size">280dp</dimen>
+    <dimen name="collapsing_appbar_height">300dp</dimen>
+</resources>

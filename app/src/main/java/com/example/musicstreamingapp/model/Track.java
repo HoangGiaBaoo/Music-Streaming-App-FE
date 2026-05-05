@@ -1,0 +1,40 @@
+package com.example.musicstreamingapp.model;
+
+import java.io.Serializable;
+import java.util.List;
+
+public class Track implements Serializable {
+    private Long trackId;
+    private String title;
+    private String audioUrl;
+    private String coverUrl;
+    private Integer duration;
+    private Integer playCount;
+    private String lyrics;
+    private String createdAt;
+    private Artist artist;
+    private Album album;
+    private List<Genre> genres;
+
+    public Long getTrackId() { return trackId; }
+    public String getTitle() { return title; }
+    public String getAudioUrl() { return audioUrl; }
+    public String getCoverUrl() { return coverUrl; }
+    public Integer getDuration() { return duration; }
+    public Integer getPlayCount() { return playCount; }
+    public String getLyrics() { return lyrics; }
+    public String getCreatedAt() { return createdAt; }
+    public Artist getArtist() { return artist; }
+    public Album getAlbum() { return album; }
+    public List<Genre> getGenres() { return genres; }
+
+    public String getArtistName() {
+        return artist != null ? artist.getName() : "";
+    }
+
+    public String firstLyricLine() {
+        if (lyrics == null || lyrics.isEmpty()) return "";
+        int nl = lyrics.indexOf('\n');
+        return nl < 0 ? lyrics : lyrics.substring(0, nl);
+    }
+}

@@ -1,0 +1,183 @@
+<resources>
+    <string name="app_name">Music Streaming App</string>
+
+    <!-- Auth -->
+    <string name="login">Đăng nhập</string>
+    <string name="register">Đăng ký</string>
+    <string name="username">Tên người dùng</string>
+    <string name="email">Email</string>
+    <string name="password">Mật khẩu</string>
+    <string name="no_account">Chưa có tài khoản? Đăng ký</string>
+    <string name="have_account">Đã có tài khoản? Đăng nhập</string>
+
+    <!-- Bottom nav -->
+    <string name="nav_home">Trang chủ</string>
+    <string name="nav_search">Tìm kiếm</string>
+    <string name="nav_library">Thư viện</string>
+    <string name="nav_premium">Premium</string>
+    <string name="nav_create">Tạo</string>
+
+    <!-- Home chips -->
+    <string name="chip_all">Tất cả</string>
+    <string name="chip_music">Nhạc</string>
+    <string name="chip_following">Đang theo dõi</string>
+    <string name="chip_podcast">Podcast</string>
+    <string name="show_all">Hiện tất cả</string>
+
+    <!-- Search -->
+    <string name="search_title">Tìm kiếm</string>
+    <string name="search_hint">Bạn muốn nghe gì?</string>
+    <string name="search_explore">Khám phá nội dung mới mẻ</string>
+    <string name="search_browse_all">Duyệt tìm tất cả</string>
+
+    <!-- Library -->
+    <string name="library_title">Thư viện</string>
+    <string name="filter_playlist">Playlist</string>
+    <string name="filter_artist">Nghệ sĩ</string>
+    <string name="filter_album">Album</string>
+    <string name="filter_liked">Đã thích</string>
+    <string name="sort_recent">Gần đây</string>
+    <string name="add_artist">Thêm nghệ sĩ</string>
+    <string name="add_podcast">Thêm podcast</string>
+    <string name="add_event">Thêm sự kiện và địa điểm</string>
+    <string name="add_music">Thêm nhạc</string>
+    <string name="empty_library_artists">Bạn chưa theo dõi nghệ sĩ nào</string>
+    <string name="empty_library_playlists">Bạn chưa có playlist nào</string>
+    <string name="empty_library_liked">Bạn chưa thích bài hát nào</string>
+
+    <!-- Premium -->
+    <string name="premium_label">Premium</string>
+    <string name="premium_headline">Trải nghiệm âm nhạc đỉnh cao với Premium Individual.</string>
+    <string name="premium_start">Bắt đầu</string>
+    <string name="premium_reasons">Lý do nên dùng gói Premium</string>
+    <string name="premium_no_ads">Nghe nhạc không quảng cáo</string>
+    <string name="premium_download">Tải xuống để nghe không cần mạng</string>
+    <string name="premium_shuffle">Phát nhạc theo thứ tự bất kỳ</string>
+    <string name="premium_quality">Chất lượng âm thanh cao</string>
+    <string name="premium_friends">Nghe cùng bạn bè theo thời gian thực</string>
+    <string name="premium_queue">Sắp xếp danh sách chờ nghe</string>
+    <string name="premium_plans_title">Các gói có sẵn</string>
+    <string name="plan_offer">Ưu đãi 2 tháng</string>
+
+    <!-- Create -->
+    <string name="create_playlist">Danh sách phát</string>
+    <string name="create_playlist_desc">Tạo danh sách phát gồm các bài hát hoặc tập podcast</string>
+    <string name="create_collab">Danh sách phát cộng tác</string>
+    <string name="create_collab_desc">Cùng bạn bè tạo danh sách phát</string>
+    <string name="create_blend">Giai điệu chung</string>
+    <string name="create_blend_desc">Tạo danh sách phát tổng hợp gu nhạc của bạn bè</string>
+    <string name="create_coming_soon">Sắp ra mắt</string>
+
+    <!-- Player -->
+    <string name="player_breadcrumb">Đang phát</string>
+    <string name="player_lyrics_preview">Bản xem trước lời bài hát</string>
+    <string name="player_show_lyrics">Hiện lời bài hát</string>
+    <string name="player_explore_artist">Khám phá %1$s</string>
+    <string name="player_artist_tracks">Các bài hát của %1$s</string>
+    <string name="player_similar_artist">Tương tự như %1$s</string>
+    <string name="player_similar_track">Tương tự như %1$s</string>
+    <string name="player_credits">Ê-kíp thực hiện</string>
+    <string name="follow">Theo dõi</string>
+    <string name="following_btn">Đang theo dõi</string>
+
+    <!-- Common -->
+    <string name="cancel">Huỷ</string>
+    <string name="create">Tạo</string>
+    <string name="add_to_playlist">Thêm vào playlist</string>
+    <string name="new_playlist">Playlist mới</string>
+    <string name="playlist_name">Tên playlist</string>
+    <string name="error_network">Lỗi kết nối mạng</string>
+    <string name="error_login">Sai tên đăng nhập hoặc mật khẩu</string>
+    <string name="no_results">Không tìm thấy kết quả</string>
+
+    <!-- Greetings (kept for older code) -->
+    <string name="good_morning">Chào buổi sáng</string>
+    <string name="good_afternoon">Chào buổi chiều</string>
+    <string name="good_evening">Chào buổi tối</string>
+    <string name="play_all">PHÁT TẤT CẢ</string>
+    <string name="shuffle">SHUFFLE</string>
+    <string name="featured_tracks">Bài hát nổi bật</string>
+    <string name="artists">Nghệ sĩ</string>
+    <string name="new_albums">Album mới</string>
+    <string name="track_results">Bài hát</string>
+    <string name="artist_results">Nghệ sĩ</string>
+    <string name="playlists">Danh sách phát</string>
+    <string name="liked_songs">Bài đã thích</string>
+    <string name="following">Đang theo dõi</string>
+    <string name="tracks">bài hát</string>
+    <string name="search">Tìm kiếm</string>
+    <string name="library">Thư viện</string>
+    <string name="home">Trang chủ</string>
+    <string name="search_hint_old">Tìm kiếm bài hát, nghệ sĩ…</string>
+    <string name="no_liked_songs">Bạn chưa thích bài hát nào</string>
+    <string name="no_playlists">Bạn chưa có playlist nào</string>
+    <string name="no_following">Bạn chưa theo dõi nghệ sĩ nào</string>
+
+    <!-- Drawer -->
+    <string name="drawer_view_profile">Xem hồ sơ</string>
+    <string name="drawer_add_account">Thêm tài khoản</string>
+    <string name="drawer_listening_stats">Số liệu hoạt động nghe</string>
+    <string name="drawer_recent">Gần đây</string>
+    <string name="drawer_news">Tin cập nhật</string>
+    <string name="drawer_settings">Cài đặt và quyền riêng tư</string>
+
+    <!-- Add account -->
+    <string name="add_account_headline">Hàng triệu bài hát.\nMiễn phí trên Spotify.</string>
+    <string name="add_account_register">Đăng ký miễn phí</string>
+    <string name="add_account_login">Đăng nhập</string>
+    <string name="add_account_warning">Khi bạn đăng nhập, bất kỳ ai khác sử dụng thiết bị này đều có thể truy cập vào tài khoản của bạn.</string>
+
+    <!-- Listening stats -->
+    <string name="stats_period_this_week">Tuần này</string>
+    <string name="stats_period_last_week">Tuần trước</string>
+    <string name="stats_top_artist">Nghệ sĩ yêu thích</string>
+    <string name="stats_top_track">Bài hát yêu thích</string>
+    <string name="stats_empty_title">Tiếp tục nghe để biết thêm số liệu thống kê</string>
+    <string name="stats_empty_body">Bạn càng phát nhiều bài hát, chúng tôi càng có nhiều số liệu để chia sẻ với bạn.</string>
+    <string name="stats_week_empty">Tuần này bạn không nghe gì cả</string>
+    <string name="stats_week_empty_body">Đừng lo, không sao cả.</string>
+
+    <!-- Settings -->
+    <string name="settings_logout">Đăng xuất</string>
+    <string name="settings_account">Tài khoản</string>
+    <string name="settings_content_display">Nội dung và chế độ hiển thị</string>
+    <string name="settings_content_display_sub">Canvas • Cho phép nội dung phản cảm</string>
+    <string name="settings_privacy">Quyền riêng tư và kết nối xã hội</string>
+    <string name="settings_privacy_sub">Chế độ nghe riêng tư • Playlist công khai</string>
+    <string name="settings_playback">Phát</string>
+    <string name="settings_playback_sub">Phát liên tục • Tự động phát</string>
+    <string name="settings_notifications">Thông báo</string>
+    <string name="settings_notifications_sub">Thông báo đẩy • Email</string>
+    <string name="settings_devices">Ứng dụng và thiết bị</string>
+    <string name="settings_devices_sub">Google Maps • Điều khiển Spotify Connect</string>
+    <string name="settings_data">Tiết kiệm dữ liệu và ngoại tuyến</string>
+    <string name="settings_data_sub">Trình tiết kiệm dữ liệu • Tải xuống qua dữ liệu di động</string>
+    <string name="settings_quality">Chất lượng nội dung nghe nhìn</string>
+    <string name="settings_ads">Quảng cáo</string>
+    <string name="settings_ads_sub">Quảng cáo được cá nhân hóa</string>
+    <string name="settings_about">Giới thiệu</string>
+    <string name="settings_about_sub">Phiên bản 1.0 • Chính sách quyền riêng tư</string>
+
+    <!-- Recent -->
+    <string name="recent_today">Hôm nay</string>
+    <string name="recent_yesterday">Hôm qua</string>
+    <string name="recent_two_days_ago">Hôm Kia</string>
+    <string name="recent_date_format">Ngày %1$d Thg %2$d, %3$d</string>
+    <string name="recent_filter_music">Nhạc</string>
+    <string name="recent_filter_playlists">Danh sách phát</string>
+    <string name="recent_filter_albums">Album</string>
+    <string name="recent_filter_podcasts">Podcast</string>
+
+    <!-- Profile -->
+    <string name="profile_followers_format">%1$d người theo dõi · Đang theo dõi %2$d</string>
+    <string name="profile_playlists">Danh sách phát</string>
+    <string name="profile_empty_playlists">Không có danh sách phát nào</string>
+    <string name="profile_empty_playlists_body">Để thêm một danh sách phát vào hồ sơ của bạn, hãy chuyển đến trang danh sách phát, mở danh mục rồi chọn Thêm vào hồ sơ.</string>
+    <string name="profile_edit">Chỉnh sửa</string>
+    <string name="profile_edit_display_name">Tên hiển thị</string>
+    <string name="profile_edit_bio">Giới thiệu</string>
+    <string name="profile_edit_save">Lưu</string>
+    <string name="profile_change_photo">Đổi ảnh</string>
+    <string name="profile_avatar_uploaded">Đã tải ảnh lên</string>
+    <string name="profile_avatar_failed">Tải ảnh thất bại</string>
+</resources>
