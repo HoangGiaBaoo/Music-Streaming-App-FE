@@ -2,118 +2,98 @@ package com.example.musicstreamingapp;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.FrameLayout;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
-import com.example.musicstreamingapp.model.ProfileUpdateRequest;
-import com.example.musicstreamingapp.model.UserMe;
-import com.example.musicstreamingapp.network.ApiService;
-import com.example.musicstreamingapp.network.RetrofitClient;
-import com.example.musicstreamingapp.util.TokenManager;
-import com.google.android.material.button.MaterialButton;
+import com.example.musicstreamingapp.databinding.ActivityEditProfileBinding;
+import com.example.musicstreamingapp.viewmodel.EditProfileViewModel;
+import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class EditProfileActivity extends AppCompatActivity {
+
     public static final String EXTRA_DISPLAY_NAME = "displayName";
     public static final String EXTRA_BIO = "bio";
     public static final String EXTRA_AVATAR = "avatarUrl";
 
-    private TextInputEditText etDisplayName, etBio;
-    private MaterialButton btnSave;
-    private CircleImageView ivAvatar;
-    private FrameLayout avatarFrame;
-    private String currentAvatar;
+    private ActivityEditProfileBinding b;
+    private EditProfileViewModel vm;
 
     private final ActivityResultLauncher<String> pickImage = registerForActivityResult(
         new ActivityResultContracts.GetContent(),
-        uri -> { if (uri != null) uploadAvatar(uri); });
+        uri -> { if (uri != null) handlePickedUri(uri); });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_profile);
+        b = ActivityEditProfileBinding.inflate(getLayoutInflater());
+        setContentView(b.getRoot());
 
-        Toolbar tb = findViewById(R.id.toolbar);
-        setSupportActionBar(tb);
-        tb.setNavigationOnClickListener(v -> finish());
+        setSupportActionBar(b.toolbar);
+        b.toolbar.setNavigationOnClickListener(v -> finish());
 
-        etDisplayName = findViewById(R.id.et_display_name);
-        etBio = findViewById(R.id.et_bio);
-        btnSave = findViewById(R.id.btn_save);
-        ivAvatar = findViewById(R.id.iv_avatar);
-        avatarFrame = (FrameLayout) ivAvatar.getParent();
+        b.etDisplayName.setText(getIntent().getStringExtra(EXTRA_DISPLAY_NAME));
+        b.etBio.setText(getIntent().getStringExtra(EXTRA_BIO));
 
-        etDisplayName.setText(getIntent().getStringExtra(EXTRA_DISPLAY_NAME));
-        etBio.setText(getIntent().getStringExtra(EXTRA_BIO));
-        currentAvatar = getIntent().getStringExtra(EXTRA_AVATAR);
+        vm = new ViewModelProvider(this, new VmFactory(this)).get(EditProfileViewModel.class);
+        vm.setInitialAvatar(getIntent().getStringExtra(EXTRA_AVATAR));
 
-        if (currentAvatar != null && !currentAvatar.isEmpty()) {
-            Glide.with(this)
-                .load(MainActivity.buildMediaUrl(currentAvatar))
-                .placeholder(R.drawable.ic_avatar_placeholder)
-                .into(ivAvatar);
-        }
+        b.ivAvatar.setOnClickListener(v -> pickImage.launch("image/*"));
+        b.tvChangePhoto.setOnClickListener(v -> pickImage.launch("image/*"));
+        b.btnSave.setOnClickListener(v -> vm.onSaveClicked(
+            b.etDisplayName.getText() == null ? "" : b.etDisplayName.getText().toString(),
+            b.etBio.getText() == null ? "" : b.etBio.getText().toString()));
 
-        avatarFrame.setOnClickListener(v -> pickImage.launch("image/*"));
-        btnSave.setOnClickListener(v -> save());
+        observeViewModel();
     }
 
-    private void uploadAvatar(Uri uri) {
+    private void observeViewModel() {
+        vm.avatarUrl().observe(this, url -> {
+            if (url == null || url.isEmpty()) return;
+            Glide.with(this)
+                .load(MainActivity.buildMediaUrl(url))
+                .placeholder(R.drawable.ic_avatar_placeholder)
+                .into(b.ivAvatar);
+        });
+        vm.uploading().observe(this, up -> b.ivAvatar.setEnabled(!Boolean.TRUE.equals(up)));
+        vm.saving().observe(this, sv -> b.btnSave.setEnabled(!Boolean.TRUE.equals(sv)));
+        vm.message().observe(this, e -> e.consume(this::showMessage));
+        vm.saveDone().observe(this, e -> e.consume(ok -> finish()));
+    }
+
+    private void showMessage(EditProfileViewModel.Msg msg) {
+        int resId;
+        switch (msg) {
+            case AVATAR_UPLOADED: resId = R.string.profile_avatar_uploaded; break;
+            case AVATAR_FAILED:   resId = R.string.profile_avatar_failed;   break;
+            case NETWORK_ERROR:   resId = R.string.error_network;           break;
+            case SAVE_FAILED:
+            default:
+                Snackbar.make(b.getRoot(), "Lưu thất bại", Snackbar.LENGTH_SHORT).show();
+                return;
+        }
+        Snackbar.make(b.getRoot(), resId, Snackbar.LENGTH_SHORT).show();
+    }
+
+    private void handlePickedUri(Uri uri) {
         byte[] bytes;
-        String mime;
         try (InputStream in = getContentResolver().openInputStream(uri)) {
             if (in == null) throw new IOException("openInputStream returned null");
             bytes = readAll(in);
         } catch (IOException e) {
-            Snackbar.make(btnSave, R.string.profile_avatar_failed, Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(b.getRoot(), R.string.profile_avatar_failed, Snackbar.LENGTH_SHORT).show();
             return;
         }
-        mime = getContentResolver().getType(uri);
-        if (mime == null) mime = "image/jpeg";
-
-        RequestBody body = RequestBody.create(bytes, MediaType.parse(mime));
-        MultipartBody.Part part = MultipartBody.Part.createFormData("file", "avatar.jpg", body);
-
-        avatarFrame.setEnabled(false);
-        ApiService api = RetrofitClient.getApiService(TokenManager.getPrefs(this));
-        api.uploadAvatar(part).enqueue(new Callback<Map<String, String>>() {
-            @Override public void onResponse(Call<Map<String, String>> c, Response<Map<String, String>> r) {
-                avatarFrame.setEnabled(true);
-                if (r.isSuccessful() && r.body() != null && r.body().get("avatarUrl") != null) {
-                    currentAvatar = r.body().get("avatarUrl");
-                    Glide.with(EditProfileActivity.this)
-                        .load(MainActivity.buildMediaUrl(currentAvatar))
-                        .placeholder(R.drawable.ic_avatar_placeholder)
-                        .into(ivAvatar);
-                    Snackbar.make(btnSave, R.string.profile_avatar_uploaded, Snackbar.LENGTH_SHORT).show();
-                } else {
-                    Snackbar.make(btnSave, R.string.profile_avatar_failed, Snackbar.LENGTH_SHORT).show();
-                }
-            }
-            @Override public void onFailure(Call<Map<String, String>> c, Throwable t) {
-                avatarFrame.setEnabled(true);
-                Snackbar.make(btnSave, R.string.error_network, Snackbar.LENGTH_SHORT).show();
-            }
-        });
+        String mime = getContentResolver().getType(uri);
+        vm.onAvatarPicked(bytes, mime);
     }
 
     private static byte[] readAll(InputStream in) throws IOException {
@@ -122,26 +102,5 @@ public class EditProfileActivity extends AppCompatActivity {
         int n;
         while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
         return out.toByteArray();
-    }
-
-    private void save() {
-        ProfileUpdateRequest req = new ProfileUpdateRequest(
-            etDisplayName.getText() == null ? "" : etDisplayName.getText().toString().trim(),
-            etBio.getText() == null ? "" : etBio.getText().toString().trim(),
-            currentAvatar
-        );
-        btnSave.setEnabled(false);
-        ApiService api = RetrofitClient.getApiService(TokenManager.getPrefs(this));
-        api.updateProfile(req).enqueue(new Callback<UserMe>() {
-            @Override public void onResponse(Call<UserMe> c, Response<UserMe> r) {
-                btnSave.setEnabled(true);
-                if (r.isSuccessful()) finish();
-                else Snackbar.make(btnSave, "Lưu thất bại", Snackbar.LENGTH_SHORT).show();
-            }
-            @Override public void onFailure(Call<UserMe> c, Throwable t) {
-                btnSave.setEnabled(true);
-                Snackbar.make(btnSave, R.string.error_network, Snackbar.LENGTH_SHORT).show();
-            }
-        });
     }
 }

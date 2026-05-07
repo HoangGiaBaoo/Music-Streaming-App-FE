@@ -1,50 +1,52 @@
 package com.example.musicstreamingapp;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.example.musicstreamingapp.model.SubscribeRequest;
-import com.example.musicstreamingapp.model.Subscription;
-import com.example.musicstreamingapp.network.ApiService;
-import com.example.musicstreamingapp.network.RetrofitClient;
-import com.example.musicstreamingapp.util.TokenManager;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.musicstreamingapp.databinding.ActivityPremiumPlansBinding;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
+import com.example.musicstreamingapp.viewmodel.VmFactory;
 
 public class PremiumPlansActivity extends AppCompatActivity {
-    private ApiService api;
+
+    private ActivityPremiumPlansBinding b;
+    private SubscriptionViewModel vm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_premium_plans);
-        api = RetrofitClient.getApiService(TokenManager.getPrefs(this));
+        b = ActivityPremiumPlansBinding.inflate(getLayoutInflater());
+        setContentView(b.getRoot());
 
-        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
-        findViewById(R.id.btn_subscribe_individual).setOnClickListener(v -> subscribe("INDIVIDUAL"));
-        findViewById(R.id.btn_subscribe_student).setOnClickListener(v -> subscribe("STUDENT"));
-        findViewById(R.id.btn_subscribe_family).setOnClickListener(v -> subscribe("FAMILY"));
+        vm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
+
+        b.btnBack.setOnClickListener(v -> finish());
+        b.btnSubscribeIndividual.setOnClickListener(v -> vm.onSubscribeClicked("INDIVIDUAL"));
+        b.btnSubscribeStudent.setOnClickListener(v -> vm.onSubscribeClicked("STUDENT"));
+        b.btnSubscribeFamily.setOnClickListener(v -> vm.onSubscribeClicked("FAMILY"));
+
+        observeViewModel();
     }
 
-    private void subscribe(String plan) {
-        api.subscribe(new SubscribeRequest(plan)).enqueue(new Callback<Subscription>() {
-            @Override public void onResponse(@NonNull Call<Subscription> call,
-                                             @NonNull Response<Subscription> response) {
-                String msg = response.isSuccessful() ? "Đăng ký Premium " + plan + " thành công!"
-                        : "Không thể đăng ký, hãy thử lại";
-                Toast.makeText(PremiumPlansActivity.this, msg, Toast.LENGTH_SHORT).show();
-                if (response.isSuccessful()) finish();
-            }
-            @Override public void onFailure(@NonNull Call<Subscription> call, @NonNull Throwable t) {
-                Toast.makeText(PremiumPlansActivity.this,
-                        "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+    private void observeViewModel() {
+        vm.processing().observe(this, p -> {
+            boolean enable = !Boolean.TRUE.equals(p);
+            b.btnSubscribeIndividual.setEnabled(enable);
+            b.btnSubscribeStudent.setEnabled(enable);
+            b.btnSubscribeFamily.setEnabled(enable);
         });
+        vm.successEvent().observe(this, e -> e.consume(plan -> {
+            Toast.makeText(this, "Đăng ký Premium " + plan + " thành công!",
+                Toast.LENGTH_SHORT).show();
+            finish();
+        }));
+        vm.errorEvent().observe(this, e -> e.consume(message -> {
+            String text = "network_error".equals(message)
+                ? "Lỗi mạng" : "Không thể đăng ký, hãy thử lại";
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        }));
     }
 }

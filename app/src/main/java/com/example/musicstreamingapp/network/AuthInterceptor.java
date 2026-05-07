@@ -2,6 +2,8 @@ package com.example.musicstreamingapp.network;
 
 import android.content.SharedPreferences;
 
+import com.example.musicstreamingapp.util.SessionManager;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -27,6 +29,10 @@ public class AuthInterceptor implements Interceptor {
                 .addHeader("Authorization", "Bearer " + token)
                 .build();
         }
-        return chain.proceed(request);
+        Response response = chain.proceed(request);
+        if (!isAuthEndpoint && (response.code() == 401 || response.code() == 403)) {
+            SessionManager.markExpired();
+        }
+        return response;
     }
 }

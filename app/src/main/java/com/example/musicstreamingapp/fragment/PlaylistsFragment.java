@@ -7,86 +7,68 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicstreamingapp.PlaylistDetailActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.PlaylistAdapter;
+import com.example.musicstreamingapp.databinding.FragmentPlaylistsBinding;
 import com.example.musicstreamingapp.model.Playlist;
-import com.example.musicstreamingapp.model.PlaylistRequest;
-import com.example.musicstreamingapp.network.ApiService;
-import com.example.musicstreamingapp.network.RetrofitClient;
-import com.example.musicstreamingapp.util.TokenManager;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.example.musicstreamingapp.viewmodel.PlaylistsViewModel;
+import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class PlaylistsFragment extends Fragment {
-    private ApiService api;
-    private List<Playlist> playlists = new ArrayList<>();
+
+    private FragmentPlaylistsBinding b;
+    private PlaylistsViewModel vm;
+    private final List<Playlist> playlists = new ArrayList<>();
     private PlaylistAdapter adapter;
-    private TextView tvEmpty;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_playlists, container, false);
+        b = FragmentPlaylistsBinding.inflate(inflater, container, false);
+        return b.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        api = RetrofitClient.getApiService(TokenManager.getPrefs(requireContext()));
-        tvEmpty = view.findViewById(R.id.tv_empty);
-
-        RecyclerView rv = view.findViewById(R.id.rv_playlists);
-        rv.setLayoutManager(new LinearLayoutManager(getContext()));
+        b.rvPlaylists.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new PlaylistAdapter(playlists, playlist -> {
             Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
             intent.putExtra("playlistId", playlist.getPlaylistId());
             intent.putExtra("playlistName", playlist.getName());
             startActivity(intent);
         });
-        rv.setAdapter(adapter);
+        b.rvPlaylists.setAdapter(adapter);
 
-        FloatingActionButton fab = view.findViewById(R.id.fab_add);
-        fab.setOnClickListener(v -> showCreateDialog());
+        b.fabAdd.setOnClickListener(v -> showCreateDialog());
 
-        loadPlaylists();
-    }
-
-    @Override public void onResume() {
-        super.onResume();
-        loadPlaylists();
-    }
-
-    private void loadPlaylists() {
-        api.getMyPlaylists().enqueue(new Callback<List<Playlist>>() {
-            @Override public void onResponse(@NonNull Call<List<Playlist>> call,
-                                             @NonNull Response<List<Playlist>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    playlists.clear();
-                    playlists.addAll(response.body());
-                    adapter.notifyDataSetChanged();
-                    tvEmpty.setVisibility(playlists.isEmpty() ? View.VISIBLE : View.GONE);
-                }
-            }
-            @Override public void onFailure(@NonNull Call<List<Playlist>> call, @NonNull Throwable t) {
-                if (getView() != null)
-                    Snackbar.make(getView(), R.string.error_network, Snackbar.LENGTH_SHORT).show();
-            }
+        vm = new ViewModelProvider(requireActivity(), new VmFactory(requireContext()))
+            .get(PlaylistsViewModel.class);
+        vm.playlists().observe(getViewLifecycleOwner(), data -> {
+            playlists.clear();
+            if (data != null) playlists.addAll(data);
+            adapter.notifyDataSetChanged();
+            b.tvEmpty.setVisibility(playlists.isEmpty() ? View.VISIBLE : View.GONE);
         });
+        vm.errorEvent().observe(getViewLifecycleOwner(), e -> e.consume(msg ->
+            Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show()));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        vm.refresh();
     }
 
     private void showCreateDialog() {
@@ -95,21 +77,14 @@ public class PlaylistsFragment extends Fragment {
         new AlertDialog.Builder(requireContext())
             .setTitle(R.string.new_playlist)
             .setView(et)
-            .setPositiveButton(R.string.create, (d, w) -> {
-                String name = et.getText().toString().trim();
-                if (!name.isEmpty()) createPlaylist(name);
-            })
+            .setPositiveButton(R.string.create, (d, w) -> vm.create(et.getText().toString()))
             .setNegativeButton(R.string.cancel, null)
             .show();
     }
 
-    private void createPlaylist(String name) {
-        api.createPlaylist(new PlaylistRequest(name, false)).enqueue(new Callback<Playlist>() {
-            @Override public void onResponse(@NonNull Call<Playlist> call,
-                                             @NonNull Response<Playlist> response) {
-                if (response.isSuccessful()) loadPlaylists();
-            }
-            @Override public void onFailure(@NonNull Call<Playlist> call, @NonNull Throwable t) {}
-        });
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        b = null;
     }
 }

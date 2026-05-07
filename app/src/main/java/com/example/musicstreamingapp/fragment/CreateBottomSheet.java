@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.musicstreamingapp.R;
+import com.example.musicstreamingapp.databinding.BottomSheetCreateBinding;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.PlaylistRequest;
 import com.example.musicstreamingapp.network.ApiService;
@@ -25,20 +26,23 @@ import retrofit2.Response;
 
 public class CreateBottomSheet extends BottomSheetDialogFragment {
 
+    private BottomSheetCreateBinding b;
+
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.bottom_sheet_create, container, false);
+        b = BottomSheetCreateBinding.inflate(inflater, container, false);
+        return b.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        view.findViewById(R.id.row_playlist).setOnClickListener(v -> showCreatePlaylistDialog());
-        view.findViewById(R.id.row_collab).setOnClickListener(v ->
+        b.rowPlaylist.setOnClickListener(v -> showCreatePlaylistDialog());
+        b.rowCollab.setOnClickListener(v ->
             Toast.makeText(getContext(), R.string.create_coming_soon, Toast.LENGTH_SHORT).show());
-        view.findViewById(R.id.row_blend).setOnClickListener(v ->
+        b.rowBlend.setOnClickListener(v ->
             Toast.makeText(getContext(), R.string.create_coming_soon, Toast.LENGTH_SHORT).show());
-        view.findViewById(R.id.btn_close).setOnClickListener(v -> dismiss());
+        b.btnClose.setOnClickListener(v -> dismiss());
     }
 
     private void showCreatePlaylistDialog() {
@@ -48,7 +52,8 @@ public class CreateBottomSheet extends BottomSheetDialogFragment {
         new AlertDialog.Builder(requireContext(), R.style.AlertDialogDark)
             .setTitle(R.string.new_playlist)
             .setView(input)
-            .setPositiveButton(R.string.create, (d, w) -> createPlaylist(input.getText().toString().trim()))
+            .setPositiveButton(R.string.create, (d, w) ->
+                createPlaylist(input.getText().toString().trim()))
             .setNegativeButton(R.string.cancel, null)
             .show();
     }
@@ -62,13 +67,20 @@ public class CreateBottomSheet extends BottomSheetDialogFragment {
         api.createPlaylist(body).enqueue(new Callback<Playlist>() {
             @Override public void onResponse(@NonNull Call<Playlist> call,
                                              @NonNull Response<Playlist> response) {
-                String msg = response.isSuccessful() ? "Đã tạo playlist!" : "Tạo thất bại";
-                Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),
+                    response.isSuccessful() ? "Đã tạo playlist!" : "Tạo thất bại",
+                    Toast.LENGTH_SHORT).show();
                 dismiss();
             }
             @Override public void onFailure(@NonNull Call<Playlist> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), R.string.error_network, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        b = null;
     }
 }

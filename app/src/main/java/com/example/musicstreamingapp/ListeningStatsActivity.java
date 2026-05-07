@@ -4,57 +4,61 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.musicstreamingapp.databinding.ActivityListeningStatsBinding;
 import com.example.musicstreamingapp.model.ListeningStats;
-import com.example.musicstreamingapp.network.ApiService;
-import com.example.musicstreamingapp.network.RetrofitClient;
-import com.example.musicstreamingapp.util.TokenManager;
+import com.example.musicstreamingapp.viewmodel.ListeningStatsViewModel;
+import com.example.musicstreamingapp.viewmodel.VmFactory;
+
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class ListeningStatsActivity extends AppCompatActivity {
-    private static final int MAX_SECTIONS = 3;
 
-    private ApiService api;
-    private LinearLayout container;
+    private ActivityListeningStatsBinding b;
+    private ListeningStatsViewModel vm;
+    private int renderedCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_listening_stats);
+        b = ActivityListeningStatsBinding.inflate(getLayoutInflater());
+        setContentView(b.getRoot());
 
-        Toolbar tb = findViewById(R.id.toolbar);
-        setSupportActionBar(tb);
-        tb.setNavigationOnClickListener(v -> finish());
+        setSupportActionBar(b.toolbar);
+        b.toolbar.setNavigationOnClickListener(v -> finish());
 
-        container = findViewById(R.id.container_sections);
-        api = RetrofitClient.getApiService(TokenManager.getPrefs(this));
-
-        loadStats(0);
+        vm = new ViewModelProvider(this, new VmFactory(this)).get(ListeningStatsViewModel.class);
+        vm.sections().observe(this, this::renderSections);
+        vm.loadIfNeeded();
     }
 
-    private void loadStats(int offset) {
-        api.getListeningStats("week", offset).enqueue(new Callback<ListeningStats>() {
-            @Override public void onResponse(Call<ListeningStats> c, Response<ListeningStats> r) {
-                if (r.body() != null) renderSection(r.body(), offset);
-                if (offset + 1 < MAX_SECTIONS) loadStats(offset + 1);
-            }
-            @Override public void onFailure(Call<ListeningStats> c, Throwable t) { }
-        });
+    private void renderSections(List<ListeningStatsViewModel.Section> sections) {
+        if (sections == null) return;
+        // Append only new sections (avoid full re-render after config change since
+        // ViewModel survives — re-add all when restoring inflated state was lost).
+        if (sections.size() < renderedCount) {
+            b.containerSections.removeAllViews();
+            renderedCount = 0;
+        }
+        for (int i = renderedCount; i < sections.size(); i++) {
+            renderSection(sections.get(i));
+        }
+        renderedCount = sections.size();
     }
 
-    private void renderSection(ListeningStats s, int offset) {
+    private void renderSection(ListeningStatsViewModel.Section section) {
+        ListeningStats s = section.stats;
+        int offset = section.offset;
+
         View card = LayoutInflater.from(this)
-            .inflate(R.layout.item_stats_section, container, false);
+            .inflate(R.layout.item_stats_section, b.containerSections, false);
 
         TextView label = card.findViewById(R.id.tv_label);
         TextView range = card.findViewById(R.id.tv_range);
@@ -112,7 +116,7 @@ public class ListeningStatsActivity extends AppCompatActivity {
             }
         }
 
-        container.addView(card);
+        b.containerSections.addView(card);
     }
 
     private String formatRange(String start, String end) {

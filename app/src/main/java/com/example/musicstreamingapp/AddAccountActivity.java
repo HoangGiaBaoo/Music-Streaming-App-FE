@@ -6,11 +6,12 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.material.button.MaterialButton;
+import com.example.musicstreamingapp.databinding.ActivityAddAccountBinding;
 
 public class AddAccountActivity extends AppCompatActivity {
+
+    private ActivityAddAccountBinding b;
 
     private final ActivityResultLauncher<Intent> loginLauncher = registerForActivityResult(
         new ActivityResultContracts.StartActivityForResult(),
@@ -22,19 +23,16 @@ public class AddAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_account);
+        b = ActivityAddAccountBinding.inflate(getLayoutInflater());
+        setContentView(b.getRoot());
 
-        Toolbar tb = findViewById(R.id.toolbar);
-        setSupportActionBar(tb);
-        tb.setNavigationOnClickListener(v -> finish());
+        setSupportActionBar(b.toolbar);
+        b.toolbar.setNavigationOnClickListener(v -> finish());
 
-        MaterialButton btnRegister = findViewById(R.id.btn_register);
-        MaterialButton btnLogin = findViewById(R.id.btn_login);
-
-        btnRegister.setOnClickListener(v ->
+        b.btnRegister.setOnClickListener(v ->
             startActivity(new Intent(this, RegisterActivity.class)));
 
-        btnLogin.setOnClickListener(v -> {
+        b.btnLogin.setOnClickListener(v -> {
             Intent i = new Intent(this, LoginActivity.class);
             i.putExtra(LoginActivity.EXTRA_RETURN_RESULT, true);
             loginLauncher.launch(i);

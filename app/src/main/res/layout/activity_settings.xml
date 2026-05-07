@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -14,8 +15,7 @@
         android:title="@string/drawer_settings"
         android:titleTextColor="@color/accent_white"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="@color/accent_white"
-        xmlns:app="http://schemas.android.com/apk/res-auto"/>
+        app:navigationIconTint="@color/accent_white"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -33,10 +33,14 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_account"/>
                 <TextView
                     android:id="@+id/sub_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="—"/>
             </LinearLayout>
@@ -46,9 +50,13 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_content_display"/>
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="@string/settings_content_display_sub"/>
             </LinearLayout>
@@ -63,9 +71,13 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowTitle"
                         android:text="@string/settings_privacy"/>
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowSubtitle"
                         android:text="@string/settings_privacy_sub"/>
                 </LinearLayout>
@@ -81,9 +93,13 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_playback"/>
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="@string/settings_playback_sub"/>
             </LinearLayout>
@@ -98,9 +114,13 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowTitle"
                         android:text="@string/settings_notifications"/>
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowSubtitle"
                         android:text="@string/settings_notifications_sub"/>
                 </LinearLayout>
@@ -116,9 +136,13 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_devices"/>
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="@string/settings_devices_sub"/>
             </LinearLayout>
@@ -133,9 +157,13 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowTitle"
                         android:text="@string/settings_data"/>
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowSubtitle"
                         android:text="@string/settings_data_sub"/>
                 </LinearLayout>
@@ -151,10 +179,14 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_quality"/>
                 <TextView
                     android:id="@+id/sub_quality"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="AUTO"/>
             </LinearLayout>
@@ -169,9 +201,13 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowTitle"
                         android:text="@string/settings_ads"/>
                     <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         style="@style/SettingsRowSubtitle"
                         android:text="@string/settings_ads_sub"/>
                 </LinearLayout>
@@ -187,15 +223,20 @@
                 style="@style/SettingsRow"
                 android:orientation="vertical">
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowTitle"
                     android:text="@string/settings_about"/>
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     style="@style/SettingsRowSubtitle"
                     android:text="@string/settings_about_sub"/>
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_logout"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -204,9 +245,7 @@
                 android:text="@string/settings_logout"
                 android:textColor="@color/accent_white"
                 app:strokeColor="@color/outline_grey"
-                app:cornerRadius="22dp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+                app:cornerRadius="22dp"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

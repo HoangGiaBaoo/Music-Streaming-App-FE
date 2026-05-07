@@ -2,173 +2,139 @@ package com.example.musicstreamingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.adapter.ExploreArtistAdapter;
-import com.example.musicstreamingapp.model.Artist;
+import com.example.musicstreamingapp.databinding.ActivityPlayerBinding;
 import com.example.musicstreamingapp.model.Track;
-import com.example.musicstreamingapp.network.ApiService;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.TimeUtil;
-import com.example.musicstreamingapp.util.TokenManager;
+import com.example.musicstreamingapp.viewmodel.PlayerViewModel;
+import com.example.musicstreamingapp.viewmodel.VmFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class PlayerActivity extends AppCompatActivity implements PlayerManager.OnTrackChangeListener {
-    private ImageView ivBg, ivCover, ivCreditAvatar;
-    private TextView tvTitle, tvArtist, tvCurrentTime, tvTotalTime, tvLyricsTeaser, tvLyricsCard,
-        tvExploreArtistTitle, tvCreditArtist, tvBreadcrumbBottom;
-    private ImageButton btnPlayPause, btnNext, btnPrev, btnLike, btnBack;
-    private Button btnFollowArtist, btnShowLyrics;
-    private SeekBar seekBar;
-    private RecyclerView rvExploreArtist;
-    private ApiService api;
-    private boolean isLiked = false, isFollowing = false;
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private Runnable progressUpdater;
+public class PlayerActivity extends AppCompatActivity {
+
+    private ActivityPlayerBinding b;
+    private PlayerViewModel vm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_player);
+        b = ActivityPlayerBinding.inflate(getLayoutInflater());
+        setContentView(b.getRoot());
 
-        api = RetrofitClient.getApiService(TokenManager.getPrefs(this));
-
-        ivBg = findViewById(R.id.iv_bg_blur);
-        ivCover = findViewById(R.id.iv_cover);
-        tvTitle = findViewById(R.id.tv_title);
-        tvArtist = findViewById(R.id.tv_artist);
-        tvCurrentTime = findViewById(R.id.tv_current_time);
-        tvTotalTime = findViewById(R.id.tv_total_time);
-        tvLyricsTeaser = findViewById(R.id.tv_lyrics_teaser);
-        tvLyricsCard = findViewById(R.id.tv_lyrics_card);
-        tvExploreArtistTitle = findViewById(R.id.tv_explore_artist_title);
-        tvCreditArtist = findViewById(R.id.tv_credit_artist);
-        tvBreadcrumbBottom = findViewById(R.id.tv_breadcrumb_bottom);
-        seekBar = findViewById(R.id.seekbar);
-        btnBack = findViewById(R.id.btn_back);
-        btnPlayPause = findViewById(R.id.btn_play_pause);
-        btnNext = findViewById(R.id.btn_next);
-        btnPrev = findViewById(R.id.btn_prev);
-        btnLike = findViewById(R.id.btn_like);
-        btnFollowArtist = findViewById(R.id.btn_follow_artist);
-        btnShowLyrics = findViewById(R.id.btn_show_lyrics);
-        rvExploreArtist = findViewById(R.id.rv_explore_artist);
-        ivCreditAvatar = findViewById(R.id.iv_credit_avatar);
-
-        rvExploreArtist.setLayoutManager(new LinearLayoutManager(this,
+        b.rvExploreArtist.setLayoutManager(new LinearLayoutManager(this,
             RecyclerView.HORIZONTAL, false));
 
-        Track track = (Track) getIntent().getSerializableExtra("track");
-        if (track != null) {
-            PlayerManager.getInstance().play(this, track, new ArrayList<>(), 0);
-            recordHistory(track.getTrackId());
+        Track intentTrack = (Track) getIntent().getSerializableExtra("track");
+        if (intentTrack != null) {
+            PlayerManager.getInstance().play(this, intentTrack, new ArrayList<>(), 0);
         }
 
-        PlayerManager.getInstance().setListener(this);
+        vm = new ViewModelProvider(this, new VmFactory(this)).get(PlayerViewModel.class);
+        if (intentTrack != null) vm.recordPlay(intentTrack.getTrackId());
 
-        btnBack.setOnClickListener(v -> finish());
-        btnPlayPause.setOnClickListener(v -> {
-            PlayerManager.getInstance().togglePlayPause();
-            updatePlayButton();
-        });
-        btnNext.setOnClickListener(v -> PlayerManager.getInstance().playNext());
-        btnPrev.setOnClickListener(v -> PlayerManager.getInstance().playPrevious());
-        btnLike.setOnClickListener(v -> toggleLike());
-        btnFollowArtist.setOnClickListener(v -> toggleFollowArtist());
-        btnShowLyrics.setOnClickListener(v -> {
-            Track t = PlayerManager.getInstance().getCurrentTrack();
-            if (t != null && t.getLyrics() != null) {
-                Intent in = new Intent(this, LyricsActivity.class);
-                in.putExtra("title", t.getTitle());
-                in.putExtra("artist", t.getArtistName());
-                in.putExtra("lyrics", t.getLyrics());
-                startActivity(in);
-            }
-        });
-
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
-                if (fromUser) PlayerManager.getInstance().seekTo(progress);
-            }
-            @Override public void onStartTrackingTouch(SeekBar sb) {}
-            @Override public void onStopTrackingTouch(SeekBar sb) {}
-        });
-
-        updateUI(PlayerManager.getInstance().getCurrentTrack());
-        startProgressUpdater();
+        wireControls();
+        observeViewModel();
     }
 
-    private void updateUI(Track track) {
+    private void wireControls() {
+        b.btnBack.setOnClickListener(v -> finish());
+        b.btnPlayPause.setOnClickListener(v -> vm.onPlayPauseClicked());
+        b.btnNext.setOnClickListener(v -> vm.onNextClicked());
+        b.btnPrev.setOnClickListener(v -> vm.onPrevClicked());
+        b.btnLike.setOnClickListener(v -> vm.onLikeClicked());
+        b.btnFollowArtist.setOnClickListener(v -> vm.onFollowArtistClicked());
+        b.btnShowLyrics.setOnClickListener(v -> openLyrics());
+
+        b.seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
+                if (fromUser) vm.onSeek(progress);
+            }
+            @Override public void onStartTrackingTouch(SeekBar sb) { }
+            @Override public void onStopTrackingTouch(SeekBar sb) { }
+        });
+    }
+
+    private void observeViewModel() {
+        vm.currentTrack().observe(this, this::renderTrack);
+        vm.playing().observe(this, this::renderPlayState);
+        vm.following().observe(this, isFollowing -> b.btnFollowArtist.setText(
+            Boolean.TRUE.equals(isFollowing) ? R.string.following_btn : R.string.follow));
+        vm.progress().observe(this, this::renderProgress);
+    }
+
+    private void openLyrics() {
+        Track t = PlayerManager.getInstance().getCurrentTrack();
+        if (t == null || t.getLyrics() == null) return;
+        Intent in = new Intent(this, LyricsActivity.class);
+        in.putExtra("title", t.getTitle());
+        in.putExtra("artist", t.getArtistName());
+        in.putExtra("lyrics", t.getLyrics());
+        startActivity(in);
+    }
+
+    private void renderTrack(Track track) {
         if (track == null) return;
-        tvTitle.setText(track.getTitle());
-        tvArtist.setText(track.getArtistName());
-        tvCreditArtist.setText(track.getArtistName());
-        tvTotalTime.setText(track.getDuration() != null
+        b.tvTitle.setText(track.getTitle());
+        b.tvArtist.setText(track.getArtistName());
+        b.tvCreditArtist.setText(track.getArtistName());
+        b.tvTotalTime.setText(track.getDuration() != null
             ? TimeUtil.formatSeconds(track.getDuration()) : "--:--");
-        tvExploreArtistTitle.setText(getString(R.string.player_explore_artist, track.getArtistName()));
+        b.tvExploreArtistTitle.setText(getString(R.string.player_explore_artist, track.getArtistName()));
 
         if (track.getAlbum() != null && track.getAlbum().getTitle() != null) {
-            tvBreadcrumbBottom.setText(track.getAlbum().getTitle().toUpperCase());
+            b.tvBreadcrumbBottom.setText(track.getAlbum().getTitle().toUpperCase());
         }
 
         if (track.getLyrics() != null && !track.getLyrics().isEmpty()) {
-            tvLyricsTeaser.setText(track.firstLyricLine());
-            tvLyricsTeaser.setVisibility(View.VISIBLE);
-            tvLyricsCard.setText(track.getLyrics());
+            b.tvLyricsTeaser.setText(track.firstLyricLine());
+            b.tvLyricsTeaser.setVisibility(View.VISIBLE);
+            b.tvLyricsCard.setText(track.getLyrics());
         } else {
-            tvLyricsTeaser.setVisibility(View.GONE);
-            tvLyricsCard.setText("Chưa có lời bài hát");
+            b.tvLyricsTeaser.setVisibility(View.GONE);
+            b.tvLyricsCard.setText("Chưa có lời bài hát");
         }
 
         if (track.getCoverUrl() != null) {
             String url = RetrofitClient.BASE_MEDIA_URL + track.getCoverUrl();
             Glide.with(this).load(url)
                 .placeholder(R.drawable.placeholder_gradient)
-                .centerCrop().into(ivCover);
+                .centerCrop().into(b.ivCover);
             Glide.with(this).load(url)
                 .transform(new BlurTransformation(25, 3))
-                .into(ivBg);
+                .into(b.ivBgBlur);
         } else {
-            ivCover.setImageResource(R.drawable.placeholder_gradient);
-            ivBg.setImageResource(R.drawable.placeholder_gradient);
+            b.ivCover.setImageResource(R.drawable.placeholder_gradient);
+            b.ivBgBlur.setImageResource(R.drawable.placeholder_gradient);
         }
 
         if (track.getArtist() != null && track.getArtist().getAvatarUrl() != null) {
             Glide.with(this)
                 .load(RetrofitClient.BASE_MEDIA_URL + track.getArtist().getAvatarUrl())
                 .placeholder(R.drawable.placeholder_gradient)
-                .into(ivCreditAvatar);
+                .into(b.ivCreditAvatar);
         } else {
-            ivCreditAvatar.setImageResource(R.drawable.placeholder_gradient);
+            b.ivCreditAvatar.setImageResource(R.drawable.placeholder_gradient);
         }
 
-        loadExploreArtist(track);
-        updatePlayButton();
+        renderExploreCards(track);
     }
 
-    private void loadExploreArtist(Track track) {
+    private void renderExploreCards(Track track) {
         List<ExploreArtistAdapter.Card> cards = new ArrayList<>();
         String artistName = track.getArtistName();
         if (track.getArtist() != null && track.getArtist().getArtistId() != null) {
@@ -179,76 +145,22 @@ public class PlayerActivity extends AppCompatActivity implements PlayerManager.O
         }
         cards.add(new ExploreArtistAdapter.Card(
             "Tương tự như " + track.getTitle(), track.getCoverUrl(), () -> {}));
-        rvExploreArtist.setAdapter(new ExploreArtistAdapter(cards));
+        b.rvExploreArtist.setAdapter(new ExploreArtistAdapter(cards));
     }
 
-    private void updatePlayButton() {
-        btnPlayPause.setImageResource(
-            PlayerManager.getInstance().isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+    private void renderPlayState(Boolean isPlaying) {
+        b.btnPlayPause.setImageResource(
+            Boolean.TRUE.equals(isPlaying) ? R.drawable.ic_pause : R.drawable.ic_play);
     }
 
-    private void startProgressUpdater() {
-        progressUpdater = new Runnable() {
-            @Override public void run() {
-                long pos = PlayerManager.getInstance().getCurrentPosition();
-                long dur = PlayerManager.getInstance().getDuration();
-                if (dur > 0) {
-                    seekBar.setMax((int) dur);
-                    seekBar.setProgress((int) pos);
-                    tvCurrentTime.setText(TimeUtil.formatMs(pos));
-                    long remaining = dur - pos;
-                    tvTotalTime.setText("-" + TimeUtil.formatMs(remaining));
-                }
-                handler.postDelayed(this, 500);
-            }
-        };
-        handler.post(progressUpdater);
-    }
-
-    private void toggleLike() {
-        Track current = PlayerManager.getInstance().getCurrentTrack();
-        if (current == null) return;
-        isLiked = !isLiked;
-        api.toggleLike(current.getTrackId()).enqueue(emptyCb());
-    }
-
-    private void toggleFollowArtist() {
-        Track current = PlayerManager.getInstance().getCurrentTrack();
-        if (current == null || current.getArtist() == null) return;
-        isFollowing = !isFollowing;
-        btnFollowArtist.setText(isFollowing ? R.string.following_btn : R.string.follow);
-        api.toggleFollow(current.getArtist().getArtistId()).enqueue(emptyCb());
-    }
-
-    private Callback<Map<String, String>> emptyCb() {
-        return new Callback<Map<String, String>>() {
-            @Override public void onResponse(@NonNull Call<Map<String, String>> call,
-                                             @NonNull Response<Map<String, String>> response) {}
-            @Override public void onFailure(@NonNull Call<Map<String, String>> call,
-                                            @NonNull Throwable t) {}
-        };
-    }
-
-    private void recordHistory(Long trackId) {
-        api.recordPlay(trackId).enqueue(emptyCb());
-    }
-
-    @Override public void onTrackChanged(Track track) {
-        runOnUiThread(() -> updateUI(track));
-    }
-
-    @Override public void onPlayStateChanged(boolean isPlaying) {
-        runOnUiThread(this::updatePlayButton);
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        PlayerManager.getInstance().setListener(this);
-    }
-
-    @Override protected void onDestroy() {
-        super.onDestroy();
-        if (progressUpdater != null) handler.removeCallbacks(progressUpdater);
-        PlayerManager.getInstance().setListener(null);
+    private void renderProgress(long[] posDur) {
+        if (posDur == null || posDur.length < 2) return;
+        long pos = posDur[0];
+        long dur = posDur[1];
+        if (dur <= 0) return;
+        b.seekbar.setMax((int) dur);
+        b.seekbar.setProgress((int) pos);
+        b.tvCurrentTime.setText(TimeUtil.formatMs(pos));
+        b.tvTotalTime.setText("-" + TimeUtil.formatMs(dur - pos));
     }
 }

@@ -7,6 +7,7 @@ import android.os.Looper;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.musicstreamingapp.util.SessionManager;
 import com.example.musicstreamingapp.util.TokenManager;
 
 public class SplashActivity extends AppCompatActivity {
@@ -14,6 +15,9 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+        SessionManager.init(this);
+        SessionManager.resetExpiredFlag();
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             Intent intent;
