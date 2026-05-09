@@ -41,7 +41,13 @@ public class PlayerActivity extends AppCompatActivity {
 
         Track intentTrack = (Track) getIntent().getSerializableExtra("track");
         if (intentTrack != null) {
-            PlayerManager.getInstance().play(this, intentTrack, new ArrayList<>(), 0);
+            Track current = PlayerManager.getInstance().getCurrentTrack();
+            boolean alreadyPlaying = current != null
+                && intentTrack.getTrackId() != null
+                && intentTrack.getTrackId().equals(current.getTrackId());
+            if (!alreadyPlaying) {
+                PlayerManager.getInstance().play(this, intentTrack, new ArrayList<>(), 0);
+            }
         }
 
         vm = new ViewModelProvider(this, new VmFactory(this)).get(PlayerViewModel.class);

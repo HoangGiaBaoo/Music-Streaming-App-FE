@@ -3,9 +3,12 @@ package com.example.musicstreamingapp.util;
 import android.content.Context;
 import android.net.Uri;
 
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackParameters;
+import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
-
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
 
@@ -34,7 +37,26 @@ public class PlayerManager {
 
     public void init(Context ctx) {
         if (player == null) {
-            player = new ExoPlayer.Builder(ctx.getApplicationContext()).build();
+            // setEnableAudioTrackPlaybackParams(false) disables hardware speed adjustment via
+            // AudioTrack.setPlaybackParams(). This prevents speed drift caused by unreliable
+            // AudioTrack timestamps on Android emulators (sdk_gphone64_x86_64, API 36+).
+            DefaultRenderersFactory renderersFactory =
+                new DefaultRenderersFactory(ctx.getApplicationContext())
+                    .setEnableAudioTrackPlaybackParams(false);
+
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .build();
+
+            player = new ExoPlayer.Builder(ctx.getApplicationContext(), renderersFactory)
+                .setAudioAttributes(audioAttributes, /* handleAudioFocus= */ true)
+                .setHandleAudioBecomingNoisy(true)
+                .build();
+
+            // Explicitly lock speed to 1x – guards against any internal adjustment
+            player.setPlaybackParameters(PlaybackParameters.DEFAULT);
+
             player.addListener(new androidx.media3.common.Player.Listener() {
                 @Override
                 public void onIsPlayingChanged(boolean isPlaying) {
