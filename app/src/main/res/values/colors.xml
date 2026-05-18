@@ -3,30 +3,59 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Spotify Dark Theme -->
-    <color name="bg_primary">#121212</color>
-    <color name="bg_secondary">#1E1E1E</color>
-    <color name="bg_elevated">#282828</color>
+    <!-- ============================================================ -->
+    <!-- Spotify palette (chuẩn theo brand guideline)                  -->
+    <!-- ============================================================ -->
 
-    <color name="spotify_green">#1DB954</color>
-    <color name="accent_white">#FFFFFF</color>
-    <color name="text_secondary">#B3B3B3</color>
-    <color name="text_disabled">#535353</color>
+    <!-- Nền chính -->
+    <color name="spotify_black">#121212</color>       <!-- nền toàn app -->
+    <color name="spotify_dark">#191414</color>        <!-- nền thẻ, bottom bar -->
+    <color name="spotify_surface">#282828</color>     <!-- card, item list -->
+    <color name="spotify_elevated">#3E3E3E</color>    <!-- hover state, divider -->
 
+    <!-- Màu nhấn -->
+    <color name="spotify_green">#1DB954</color>       <!-- nút play, active tab, progress bar -->
+    <color name="spotify_green_dark">#1AA34A</color>  <!-- pressed state của nút green -->
+
+    <!-- Text -->
+    <color name="spotify_white">#FFFFFF</color>       <!-- text chính -->
+    <color name="spotify_gray">#B3B3B3</color>        <!-- text phụ, subtitle -->
+    <color name="spotify_gray_dark">#535353</color>   <!-- text mờ, placeholder -->
+
+    <!-- ============================================================ -->
+    <!-- Alias giữ backward-compat cho layout cũ                       -->
+    <!-- (đừng xoá — toàn bộ XML hiện tại đang tham chiếu các tên này) -->
+    <!-- ============================================================ -->
+    <color name="bg_primary">#121212</color>          <!-- = spotify_black -->
+    <color name="bg_secondary">#191414</color>        <!-- = spotify_dark -->
+    <color name="bg_elevated">#282828</color>         <!-- = spotify_surface -->
+    <color name="accent_white">#FFFFFF</color>        <!-- = spotify_white -->
+    <color name="text_secondary">#B3B3B3</color>      <!-- = spotify_gray -->
+    <color name="text_disabled">#535353</color>       <!-- = spotify_gray_dark -->
+    <color name="progress_bg">#535353</color>         <!-- = spotify_gray_dark -->
+    <color name="surface_dark">#191414</color>        <!-- = spotify_dark -->
+    <color name="divider">#3E3E3E</color>             <!-- = spotify_elevated -->
+    <color name="outline_grey">#535353</color>        <!-- = spotify_gray_dark -->
+
+    <!-- Liked / chip / placeholder (giữ nguyên) -->
     <color name="liked_red">#E91429</color>
-    <color name="progress_bg">#535353</color>
-
-    <color name="placeholder_start">#6A1B9A</color>
-    <color name="placeholder_end">#E91E8C</color>
-
+    <color name="placeholder_start">#282828</color>
+    <color name="placeholder_end">#1E1E1E</color>
     <color name="chip_active">#1DB954</color>
     <color name="chip_idle">#282828</color>
-
     <color name="avatar_orange">#E07F2F</color>
     <color name="badge_green_bg">#1DB954</color>
 
-    <!-- Drawer / surfaces -->
-    <color name="surface_dark">#1A1A1A</color>
-    <color name="divider">#2A2A2A</color>
-    <color name="outline_grey">#535353</color>
+    <!-- ============================================================ -->
+    <!-- Spotify category tile colors (cho grid "Duyệt tìm tất cả")    -->
+    <!-- Dùng sau ở Bước 6 khi redesign màn Search                     -->
+    <!-- ============================================================ -->
+    <color name="cat_red">#E91429</color>
+    <color name="cat_blue">#509BF5</color>
+    <color name="cat_pink">#E8115B</color>
+    <color name="cat_navy">#1E3264</color>
+    <color name="cat_gray">#777777</color>
+    <color name="cat_purple">#8D67AB</color>
+    <color name="cat_orange">#E13300</color>
+    <color name="cat_olive">#608108</color>
 </resources>
