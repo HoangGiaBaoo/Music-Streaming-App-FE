@@ -2,7 +2,10 @@ package com.example.musicstreamingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -23,6 +26,7 @@ import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.model.UserMe;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.AccountStore;
+import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.MainViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -39,6 +43,22 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView drawerAccountList;
     private AccountAdapter accountAdapter;
     private AccountStore accountStore;
+
+    private boolean miniPlayerShown = false;
+    private final Handler progressHandler = new Handler(Looper.getMainLooper());
+    private final Runnable progressTick = new Runnable() {
+        @Override public void run() {
+            if (b.miniPlayer.getRoot().getVisibility() == View.VISIBLE) {
+                long pos = PlayerManager.getInstance().getCurrentPosition();
+                long dur = PlayerManager.getInstance().getDuration();
+                if (dur > 0) {
+                    int pct = (int) ((pos * 100) / dur);
+                    b.miniPlayer.pbMiniProgress.setProgress(pct);
+                }
+                progressHandler.postDelayed(this, 500);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,11 +185,24 @@ public class MainActivity extends AppCompatActivity {
 
     private void renderMiniPlayer(Track track) {
         if (track == null) {
-            b.miniPlayer.getRoot().setVisibility(View.GONE);
+            if (miniPlayerShown) {
+                b.miniPlayer.getRoot().startAnimation(
+                    AnimationUtils.loadAnimation(this, R.anim.mini_player_slide_down));
+                b.miniPlayer.getRoot().setVisibility(View.GONE);
+                miniPlayerShown = false;
+                progressHandler.removeCallbacks(progressTick);
+            }
             return;
         }
-        b.miniPlayer.getRoot().setVisibility(View.VISIBLE);
+        if (!miniPlayerShown) {
+            b.miniPlayer.getRoot().setVisibility(View.VISIBLE);
+            b.miniPlayer.getRoot().startAnimation(
+                AnimationUtils.loadAnimation(this, R.anim.mini_player_slide_up));
+            miniPlayerShown = true;
+            progressHandler.post(progressTick);
+        }
         b.miniPlayer.tvMiniTitle.setText(track.getTitle());
+        b.miniPlayer.tvMiniTitle.setSelected(true); // enable marquee
         b.miniPlayer.tvMiniArtist.setText(track.getArtist() != null ? track.getArtist().getName() : "");
         if (track.getCoverUrl() != null) {
             Glide.with(this)
@@ -219,5 +252,17 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        progressHandler.removeCallbacks(progressTick);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        progressHandler.removeCallbacks(progressTick);
     }
 }

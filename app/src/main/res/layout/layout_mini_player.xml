@@ -4,19 +4,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/mini_player_height"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginBottom="2dp"
-    android:background="@drawable/bg_card_dark"
+    android:background="@drawable/bg_mini_player"
     android:clickable="true"
     android:focusable="true">
 
-    <ImageView
+    <!-- Progress bar 2dp ở top theo spec -->
+    <ProgressBar
+        android:id="@+id/pb_mini_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:max="100"
+        android:progress="0"
+        android:progressDrawable="@drawable/mini_player_progress"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_mini_cover"
         android:layout_width="@dimen/mini_player_cover"
         android:layout_height="@dimen/mini_player_cover"
-        android:layout_margin="12dp"
-        android:background="@drawable/placeholder_gradient"
+        android:layout_marginStart="12dp"
+        android:background="@color/spotify_elevated"
         android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MiniPlayerCover"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -29,9 +41,9 @@
         android:ellipsize="marquee"
         android:marqueeRepeatLimit="marquee_forever"
         android:singleLine="true"
-        android:textColor="@color/accent_white"
-        android:textSize="13sp"
-        android:textStyle="bold"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/spotify_white"
+        android:textSize="14sp"
         app:layout_constraintBottom_toTopOf="@id/tv_mini_artist"
         app:layout_constraintEnd_toStartOf="@id/btn_mini_cast"
         app:layout_constraintStart_toEndOf="@id/iv_mini_cover"
@@ -45,20 +57,22 @@
         android:ellipsize="end"
         android:layout_marginStart="12dp"
         android:singleLine="true"
-        android:textColor="@color/text_secondary"
-        android:textSize="11sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:textColor="@color/spotify_gray"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_mini_cast"
         app:layout_constraintStart_toEndOf="@id/iv_mini_cover"
         app:layout_constraintTop_toBottomOf="@id/tv_mini_title"/>
 
+    <!-- btn_mini_cast vẫn giữ ID cũ để không phải sửa Java; đổi icon sang heart per spec -->
     <ImageButton
         android:id="@+id/btn_mini_cast"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_cast"
-        android:tint="@color/accent_white"
+        android:src="@drawable/ic_favorite"
+        android:tint="@color/spotify_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_mini_play"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -70,7 +84,7 @@
         android:layout_marginEnd="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_play"
-        android:tint="@color/accent_white"
+        android:tint="@color/spotify_white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -81,7 +95,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:src="@drawable/ic_skip_next"
-        android:tint="@color/accent_white"
+        android:tint="@color/spotify_white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
