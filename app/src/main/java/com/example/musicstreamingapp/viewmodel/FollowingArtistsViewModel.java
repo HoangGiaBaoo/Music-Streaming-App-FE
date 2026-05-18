@@ -24,7 +24,7 @@ public class FollowingArtistsViewModel extends ViewModel {
     public LiveData<List<Artist>> artists() { return artists; }
 
     public void refresh() {
-        repo.getAllArtists(new RepoCallback<List<Artist>>() {
+        repo.getFollowedArtists(new RepoCallback<List<Artist>>() {
             @Override public void onSuccess(List<Artist> data) { artists.postValue(data); }
             @Override public void onError(String message) { /* keep stale */ }
         });

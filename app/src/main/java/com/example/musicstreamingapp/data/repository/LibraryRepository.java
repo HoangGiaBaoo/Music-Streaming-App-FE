@@ -41,6 +41,32 @@ public class LibraryRepository {
         api.toggleFollow(artistId).enqueue(boolCb(cb));
     }
 
+    public void getArtistPopularTracks(long artistId, RepoCallback<List<Track>> cb) {
+        enqueue(api.getArtistPopularTracks(artistId), cb);
+    }
+
+    public void toggleLike(long trackId, RepoCallback<Boolean> cb) {
+        api.toggleLike(trackId).enqueue(boolCb(cb));
+    }
+
+    public void checkFollowState(long artistId, RepoCallback<Boolean> cb) {
+        api.getFollowedArtists().enqueue(new Callback<List<Artist>>() {
+            @Override public void onResponse(Call<List<Artist>> c, Response<List<Artist>> r) {
+                if (!r.isSuccessful() || r.body() == null) { cb.onSuccess(false); return; }
+                for (Artist a : r.body()) {
+                    if (Long.valueOf(artistId).equals(a.getArtistId())) {
+                        cb.onSuccess(true);
+                        return;
+                    }
+                }
+                cb.onSuccess(false);
+            }
+            @Override public void onFailure(Call<List<Artist>> c, Throwable t) {
+                cb.onSuccess(false);
+            }
+        });
+    }
+
     // ---- Tracks --------------------------------------------------------
 
     public void getLikedTracks(RepoCallback<List<Track>> cb) { enqueue(api.getLikedTracks(), cb); }
@@ -60,6 +86,10 @@ public class LibraryRepository {
         req.name = name;
         req.isPublic = isPublic;
         enqueue(api.createPlaylist(req), cb);
+    }
+
+    public void addTrackToPlaylist(long playlistId, long trackId, RepoCallback<Boolean> cb) {
+        api.addTrackToPlaylist(playlistId, trackId).enqueue(boolCb(cb));
     }
 
     public void removeTrackFromPlaylist(long playlistId, long trackId, RepoCallback<Boolean> cb) {

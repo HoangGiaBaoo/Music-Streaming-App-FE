@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="180dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="14dp"
@@ -16,10 +17,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top|start"
             android:layout_margin="16dp"
-            android:text="Top 50"
             android:textColor="@color/accent_white"
             android:textSize="22sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            tools:text="Top 50"/>
 
         <TextView
             android:id="@+id/tv_chart_subtitle"
@@ -27,10 +28,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|start"
             android:layout_margin="16dp"
-            android:text="VIETNAM"
             android:textColor="@color/accent_white"
             android:textSize="13sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            tools:text="VIETNAM"/>
     </FrameLayout>
 
     <TextView
@@ -40,7 +41,7 @@
         android:layout_marginTop="6dp"
         android:maxLines="2"
         android:ellipsize="end"
-        android:text="Thông tin cập nhật hàng ngày về những bản nhạc đ…"
         android:textColor="@color/text_secondary"
-        android:textSize="12sp"/>
+        android:textSize="12sp"
+        tools:text="Thông tin cập nhật hàng ngày về những bản nhạc đ…"/>
 </LinearLayout>

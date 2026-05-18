@@ -98,8 +98,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override public void onSwitchAccount(AccountStore.Account a) {
                     accountStore.switchTo(a.username);
                     RetrofitClient.reset();
-                    b.drawerLayout.closeDrawer(GravityCompat.START);
-                    recreate();
+                    Intent restart = new Intent(MainActivity.this, MainActivity.class);
+                    restart.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(restart);
                 }
                 @Override public void onAddAccount() {
                     b.drawerLayout.closeDrawer(GravityCompat.START);
@@ -152,8 +153,13 @@ public class MainActivity extends AppCompatActivity {
                 .placeholder(R.drawable.ic_avatar_placeholder)
                 .into(drawerAvatar);
         }
-        accountStore.addOrUpdate(me.username, TokenManager.getToken(this),
-            me.resolveDisplayName(), me.avatarUrl);
+        // Only persist account data when it matches the current logged-in session
+        // to prevent a stale or wrong-user API response from overwriting the current account
+        String currentUsername = TokenManager.getUsername(this);
+        if (me.username != null && me.username.equals(currentUsername)) {
+            accountStore.addOrUpdate(me.username, TokenManager.getToken(this),
+                me.resolveDisplayName(), me.avatarUrl);
+        }
         refreshAccountList();
     }
 
@@ -202,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         vm.refreshFromPlayer();
         vm.updateUsername(TokenManager.getUsername(this));
+        vm.loadDrawerHeader();
         refreshAccountList();
     }
 

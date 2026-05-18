@@ -2,6 +2,8 @@ package com.example.musicstreamingapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.SeekBar;
 
@@ -15,12 +17,15 @@ import com.example.musicstreamingapp.adapter.ExploreArtistAdapter;
 import com.example.musicstreamingapp.databinding.ActivityPlayerBinding;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.LrcParser;
+import com.example.musicstreamingapp.util.LrcParser.LrcLine;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.TimeUtil;
 import com.example.musicstreamingapp.viewmodel.PlayerViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -29,6 +34,16 @@ public class PlayerActivity extends AppCompatActivity {
 
     private ActivityPlayerBinding b;
     private PlayerViewModel vm;
+
+    private List<LrcLine> lrcLines = Collections.emptyList();
+    private final Handler lyricsHandler = new Handler(Looper.getMainLooper());
+    private final Runnable lyricsRunnable = new Runnable() {
+        @Override
+        public void run() {
+            syncLyricsTeaser();
+            lyricsHandler.postDelayed(this, 100);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +72,47 @@ public class PlayerActivity extends AppCompatActivity {
         observeViewModel();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startLyricsSync();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        lyricsHandler.removeCallbacks(lyricsRunnable);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.player_no_anim, R.anim.player_slide_down);
+    }
+
+    private void closePlayer() {
+        finish();
+        overridePendingTransition(R.anim.player_no_anim, R.anim.player_slide_down);
+    }
+
+    private void startLyricsSync() {
+        lyricsHandler.removeCallbacks(lyricsRunnable);
+        if (!lrcLines.isEmpty()) {
+            lyricsHandler.post(lyricsRunnable);
+        }
+    }
+
+    private void syncLyricsTeaser() {
+        if (lrcLines.isEmpty()) return;
+        long posMs = PlayerManager.getInstance().getCurrentPosition();
+        int idx = LrcParser.findActiveIndex(lrcLines, posMs);
+        if (idx >= 0) {
+            b.tvLyricsTeaser.setText(lrcLines.get(idx).text);
+        }
+    }
+
     private void wireControls() {
-        b.btnBack.setOnClickListener(v -> finish());
+        b.btnBack.setOnClickListener(v -> closePlayer());
         b.btnPlayPause.setOnClickListener(v -> vm.onPlayPauseClicked());
         b.btnNext.setOnClickListener(v -> vm.onNextClicked());
         b.btnPrev.setOnClickListener(v -> vm.onPrevClicked());
@@ -103,14 +157,34 @@ public class PlayerActivity extends AppCompatActivity {
         b.tvExploreArtistTitle.setText(getString(R.string.player_explore_artist, track.getArtistName()));
 
         if (track.getAlbum() != null && track.getAlbum().getTitle() != null) {
+            b.tvBreadcrumbTop.setText("Đang phát từ album");
             b.tvBreadcrumbBottom.setText(track.getAlbum().getTitle().toUpperCase());
+        } else if (track.getArtist() != null && track.getArtist().getName() != null) {
+            b.tvBreadcrumbTop.setText("Đang phát từ nghệ sĩ");
+            b.tvBreadcrumbBottom.setText(track.getArtist().getName().toUpperCase());
+        } else {
+            b.tvBreadcrumbTop.setText("");
+            b.tvBreadcrumbBottom.setText("");
         }
 
-        if (track.getLyrics() != null && !track.getLyrics().isEmpty()) {
-            b.tvLyricsTeaser.setText(track.firstLyricLine());
-            b.tvLyricsTeaser.setVisibility(View.VISIBLE);
-            b.tvLyricsCard.setText(track.getLyrics());
+        String rawLyrics = track.getLyrics();
+        if (rawLyrics != null && !rawLyrics.isEmpty()) {
+            lrcLines = LrcParser.parse(rawLyrics);
+
+            // teaser: hiện dòng đầu (handler sẽ cập nhật real-time)
+            if (!lrcLines.isEmpty()) {
+                b.tvLyricsTeaser.setText(lrcLines.get(0).text);
+                b.tvLyricsTeaser.setVisibility(View.VISIBLE);
+            }
+
+            // lyrics card: text sạch không có timestamp
+            String cleanText = LrcParser.toCleanText(lrcLines);
+            b.tvLyricsCard.setText(cleanText.isEmpty() ? rawLyrics : cleanText);
+
+            startLyricsSync();
         } else {
+            lrcLines = Collections.emptyList();
+            lyricsHandler.removeCallbacks(lyricsRunnable);
             b.tvLyricsTeaser.setVisibility(View.GONE);
             b.tvLyricsCard.setText("Chưa có lời bài hát");
         }

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicstreamingapp.MainActivity;
 import com.example.musicstreamingapp.PlayerActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.ExploreCardAdapter;
@@ -53,6 +54,12 @@ public class SearchFragment extends Fragment {
             .get(MainViewModel.class);
         mainVm.usernameLetter().observe(getViewLifecycleOwner(),
             letter -> b.tvSearchAvatar.setText(letter));
+
+        b.searchAvatarContainer.setOnClickListener(v -> {
+            if (requireActivity() instanceof MainActivity) {
+                ((MainActivity) requireActivity()).openDrawer();
+            }
+        });
 
         b.rvResults.setLayoutManager(new LinearLayoutManager(getContext()));
         resultsAdapter = new HomeTrackRowAdapter(trackResults, this::openPlayer);

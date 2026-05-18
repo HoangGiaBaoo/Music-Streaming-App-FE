@@ -15,18 +15,18 @@ import java.util.List;
 
 public class LibraryViewModel extends ViewModel {
 
-    public enum Chip { PLAYLIST, ARTIST, ALBUM, LIKED }
+    public enum Chip { ALL, PLAYLIST, ARTIST, ALBUM, LIKED }
 
     private final LibraryRepository repo;
 
-    private final MutableLiveData<Chip> chip = new MutableLiveData<>(Chip.ARTIST);
+    private final MutableLiveData<Chip> chip = new MutableLiveData<>(Chip.ALL);
     private final MutableLiveData<List<Playlist>> playlists = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Artist>> artists = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Track>> liked = new MutableLiveData<>(Collections.emptyList());
 
     public LibraryViewModel(LibraryRepository repo) {
         this.repo = repo;
-        loadFor(Chip.ARTIST);
+        loadFor(Chip.ALL);
     }
 
     public LiveData<Chip> chip()                   { return chip; }
@@ -35,23 +35,28 @@ public class LibraryViewModel extends ViewModel {
     public LiveData<List<Track>> liked()           { return liked; }
 
     public void onChipSelected(Chip newChip) {
-        chip.setValue(newChip);
-        loadFor(newChip);
+        Chip current = chip.getValue();
+        Chip target = current == newChip ? Chip.ALL : newChip;
+        chip.setValue(target);
+        loadFor(target);
+    }
+
+    public void refresh() {
+        Chip current = chip.getValue();
+        if (current != null) loadFor(current);
     }
 
     private void loadFor(Chip c) {
         switch (c) {
+            case ALL:
+                loadPlaylists();
+                loadArtists();
+                break;
             case PLAYLIST:
-                repo.getMyPlaylists(new RepoCallback<List<Playlist>>() {
-                    @Override public void onSuccess(List<Playlist> data) { playlists.postValue(data); }
-                    @Override public void onError(String message) { playlists.postValue(Collections.emptyList()); }
-                });
+                loadPlaylists();
                 break;
             case ARTIST:
-                repo.getFollowedArtists(new RepoCallback<List<Artist>>() {
-                    @Override public void onSuccess(List<Artist> data) { artists.postValue(data); }
-                    @Override public void onError(String message) { artists.postValue(Collections.emptyList()); }
-                });
+                loadArtists();
                 break;
             case LIKED:
                 repo.getLikedTracks(new RepoCallback<List<Track>>() {
@@ -64,5 +69,21 @@ public class LibraryViewModel extends ViewModel {
                 /* no albums endpoint hooked up — original code left blank */
                 break;
         }
+    }
+
+    private void loadPlaylists() {
+        repo.getMyPlaylists(new RepoCallback<List<Playlist>>() {
+            @Override public void onSuccess(List<Playlist> data) {
+                playlists.postValue(data != null ? data : Collections.emptyList());
+            }
+            @Override public void onError(String message) { playlists.postValue(Collections.emptyList()); }
+        });
+    }
+
+    private void loadArtists() {
+        repo.getFollowedArtists(new RepoCallback<List<Artist>>() {
+            @Override public void onSuccess(List<Artist> data) { artists.postValue(data); }
+            @Override public void onError(String message) { artists.postValue(Collections.emptyList()); }
+        });
     }
 }

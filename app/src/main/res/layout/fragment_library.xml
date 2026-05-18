@@ -16,9 +16,13 @@
         android:paddingBottom="6dp">
 
         <FrameLayout
+            android:id="@+id/lib_avatar_container"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:background="@drawable/bg_avatar_orange">
+            android:background="@drawable/bg_avatar_orange"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
             <TextView
                 android:id="@+id/tv_lib_avatar"

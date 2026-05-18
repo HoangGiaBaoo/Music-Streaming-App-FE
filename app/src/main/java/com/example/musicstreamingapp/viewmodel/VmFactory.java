@@ -88,6 +88,12 @@ public class VmFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(FollowingArtistsViewModel.class)) {
             return (T) new FollowingArtistsViewModel(new LibraryRepository(api));
         }
+        if (modelClass.isAssignableFrom(AddArtistViewModel.class)) {
+            return (T) new AddArtistViewModel(new LibraryRepository(api));
+        }
+        if (modelClass.isAssignableFrom(AddToPlaylistViewModel.class)) {
+            return (T) new AddToPlaylistViewModel(new LibraryRepository(api));
+        }
         throw new IllegalArgumentException("Unknown ViewModel: " + modelClass.getName());
     }
 }

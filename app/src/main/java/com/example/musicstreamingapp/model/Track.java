@@ -34,7 +34,12 @@ public class Track implements Serializable {
 
     public String firstLyricLine() {
         if (lyrics == null || lyrics.isEmpty()) return "";
-        int nl = lyrics.indexOf('\n');
-        return nl < 0 ? lyrics : lyrics.substring(0, nl);
+        for (String line : lyrics.split("\n")) {
+            String trimmed = line.trim();
+            // strip LRC timestamp prefix [mm:ss.xx]
+            String text = trimmed.replaceFirst("^\\[\\d{2}:\\d{2}\\.\\d{2}]", "").trim();
+            if (!text.isEmpty()) return text;
+        }
+        return "";
     }
 }

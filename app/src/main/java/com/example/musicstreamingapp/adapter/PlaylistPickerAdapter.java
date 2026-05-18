@@ -1,0 +1,146 @@
+package com.example.musicstreamingapp.adapter;
+
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.example.musicstreamingapp.R;
+import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.viewmodel.AddToPlaylistViewModel;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class PlaylistPickerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_SECTION = AddToPlaylistViewModel.ListItem.TYPE_SECTION;
+    private static final int TYPE_PLAYLIST = AddToPlaylistViewModel.ListItem.TYPE_PLAYLIST;
+
+    public interface OnToggle { void onToggle(Playlist playlist); }
+    public interface OnClearAll { void onClearAll(); }
+
+    private List<AddToPlaylistViewModel.ListItem> items = new ArrayList<>();
+    private Set<Long> selectedIds = new HashSet<>();
+    private final OnToggle onToggle;
+    private final OnClearAll onClearAll;
+
+    public PlaylistPickerAdapter(OnToggle onToggle, OnClearAll onClearAll) {
+        this.onToggle = onToggle;
+        this.onClearAll = onClearAll;
+    }
+
+    public void setItems(List<AddToPlaylistViewModel.ListItem> items) {
+        this.items = items != null ? new ArrayList<>(items) : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+    public void setSelectedIds(Set<Long> ids) {
+        this.selectedIds = ids != null ? new HashSet<>(ids) : new HashSet<>();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return items.get(position).type;
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inf = LayoutInflater.from(parent.getContext());
+        if (viewType == TYPE_SECTION) {
+            return new SectionVH(inf.inflate(R.layout.item_playlist_picker_section, parent, false));
+        }
+        return new PlaylistVH(inf.inflate(R.layout.item_playlist_picker, parent, false));
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        AddToPlaylistViewModel.ListItem item = items.get(position);
+        if (holder instanceof SectionVH) {
+            SectionVH svh = (SectionVH) holder;
+            svh.tvLabel.setText(item.sectionLabel);
+            if (item.showClearAll) {
+                svh.tvClearAll.setVisibility(View.VISIBLE);
+                svh.tvClearAll.setOnClickListener(v -> { if (onClearAll != null) onClearAll.onClearAll(); });
+            } else {
+                svh.tvClearAll.setVisibility(View.GONE);
+            }
+        } else if (holder instanceof PlaylistVH) {
+            PlaylistVH pvh = (PlaylistVH) holder;
+            Playlist p = item.playlist;
+            pvh.tvName.setText(p.getName() != null ? p.getName() : "");
+
+            if (item.trackCount < 0) {
+                pvh.tvTrackCount.setVisibility(View.GONE);
+            } else {
+                pvh.tvTrackCount.setVisibility(View.VISIBLE);
+                pvh.tvTrackCount.setText(item.trackCount == 0 ? "Trống" : item.trackCount + " bài hát");
+            }
+
+            boolean selected = selectedIds.contains(p.getPlaylistId());
+            pvh.ivCheck.setImageResource(selected
+                ? R.drawable.ic_check_circle_green : R.drawable.ic_circle_outline);
+
+            if (p.getCoverUrl() != null && !p.getCoverUrl().isEmpty()) {
+                pvh.ivCover.clearColorFilter();
+                pvh.ivCover.setBackgroundColor(0xFF282828);
+                Glide.with(pvh.ivCover)
+                    .load(RetrofitClient.BASE_MEDIA_URL + p.getCoverUrl())
+                    .placeholder(R.drawable.placeholder_gradient)
+                    .centerCrop()
+                    .into(pvh.ivCover);
+            } else if (p.getCoverColor() != null) {
+                try {
+                    pvh.ivCover.setBackgroundColor(Color.parseColor(p.getCoverColor()));
+                } catch (Exception e) {
+                    pvh.ivCover.setBackgroundColor(0xFF282828);
+                }
+                pvh.ivCover.setImageResource(R.drawable.ic_music_note);
+                pvh.ivCover.setColorFilter(Color.argb(136, 255, 255, 255));
+            } else {
+                pvh.ivCover.setBackgroundColor(0xFF282828);
+                pvh.ivCover.setImageResource(R.drawable.ic_music_note);
+                pvh.ivCover.setColorFilter(Color.argb(136, 255, 255, 255));
+            }
+
+            pvh.itemView.setOnClickListener(v -> { if (onToggle != null) onToggle.onToggle(p); });
+        }
+    }
+
+    static class SectionVH extends RecyclerView.ViewHolder {
+        TextView tvLabel, tvClearAll;
+        SectionVH(@NonNull View v) {
+            super(v);
+            tvLabel = v.findViewById(R.id.tv_section_label);
+            tvClearAll = v.findViewById(R.id.tv_clear_all);
+        }
+    }
+
+    static class PlaylistVH extends RecyclerView.ViewHolder {
+        ImageView ivCover, ivCheck;
+        TextView tvName, tvTrackCount;
+        PlaylistVH(@NonNull View v) {
+            super(v);
+            ivCover = v.findViewById(R.id.iv_cover);
+            ivCheck = v.findViewById(R.id.iv_check);
+            tvName = v.findViewById(R.id.tv_name);
+            tvTrackCount = v.findViewById(R.id.tv_track_count);
+        }
+    }
+}

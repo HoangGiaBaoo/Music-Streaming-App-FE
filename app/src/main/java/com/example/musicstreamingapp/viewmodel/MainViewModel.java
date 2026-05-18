@@ -44,6 +44,10 @@ public class MainViewModel extends ViewModel implements PlayerManager.OnTrackCha
         });
     }
 
+    public void clearUserMe() {
+        userMe.setValue(null);
+    }
+
     public void onMiniPlayPauseClicked() {
         PlayerManager.getInstance().togglePlayPause();
         playing.setValue(PlayerManager.getInstance().isPlaying());

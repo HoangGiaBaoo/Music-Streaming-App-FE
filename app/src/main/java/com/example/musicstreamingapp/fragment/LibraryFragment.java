@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.musicstreamingapp.AddArtistActivity;
+import com.example.musicstreamingapp.MainActivity;
 import com.example.musicstreamingapp.AlbumDetailActivity;
 import com.example.musicstreamingapp.ArtistDetailActivity;
 import com.example.musicstreamingapp.PlayerActivity;
@@ -53,6 +55,12 @@ public class LibraryFragment extends Fragment {
         mainVm.usernameLetter().observe(getViewLifecycleOwner(),
             letter -> b.tvLibAvatar.setText(letter));
 
+        b.libAvatarContainer.setOnClickListener(v -> {
+            if (requireActivity() instanceof MainActivity) {
+                ((MainActivity) requireActivity()).openDrawer();
+            }
+        });
+
         b.libChipPlaylist.setOnClickListener(v -> vm.onChipSelected(Chip.PLAYLIST));
         b.libChipArtist.setOnClickListener(v ->   vm.onChipSelected(Chip.ARTIST));
         b.libChipAlbum.setOnClickListener(v ->    vm.onChipSelected(Chip.ALBUM));
@@ -64,23 +72,16 @@ public class LibraryFragment extends Fragment {
 
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(LibraryViewModel.class);
 
-        vm.chip().observe(getViewLifecycleOwner(), this::renderChipState);
-        vm.playlists().observe(getViewLifecycleOwner(), data -> {
-            if (vm.chip().getValue() == Chip.PLAYLIST) renderPlaylists(data);
-        });
-        vm.artists().observe(getViewLifecycleOwner(), data -> {
-            if (vm.chip().getValue() == Chip.ARTIST) renderArtists(data);
-        });
-        vm.liked().observe(getViewLifecycleOwner(), data -> {
-            if (vm.chip().getValue() == Chip.LIKED) renderLiked(data);
-        });
+        vm.chip().observe(getViewLifecycleOwner(), c -> { renderChipState(c); renderCurrent(); });
+        vm.playlists().observe(getViewLifecycleOwner(), data -> renderCurrent());
+        vm.artists().observe(getViewLifecycleOwner(), data -> renderCurrent());
+        vm.liked().observe(getViewLifecycleOwner(), data -> renderCurrent());
     }
 
     private void renderChipState(Chip c) {
         TextView[] all = { b.libChipPlaylist, b.libChipArtist, b.libChipAlbum, b.libChipLiked };
-        TextView active = chipView(c);
+        TextView active = (c == Chip.ALL) ? null : chipView(c);
         for (TextView t : all) t.setSelected(t == active);
-        if (c == Chip.ALBUM) renderAlbumPlaceholder();
     }
 
     private TextView chipView(Chip c) {
@@ -89,57 +90,66 @@ public class LibraryFragment extends Fragment {
             case ARTIST:   return b.libChipArtist;
             case ALBUM:    return b.libChipAlbum;
             case LIKED:    return b.libChipLiked;
-            default:       return b.libChipArtist;
+            default:       return null;
         }
     }
 
-    private void renderPlaylists(List<Playlist> data) {
+    private void renderCurrent() {
+        Chip c = vm.chip().getValue();
+        if (c == null) return;
         items.clear();
-        if (data != null) {
-            for (Playlist p : data) {
-                items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_PLAYLIST,
-                    p.getCoverUrl(), p.getName(), "Danh sách phát",
-                    () -> openPlaylist(p)));
-            }
-        }
-        appendActions();
-        adapter.notifyDataSetChanged();
-    }
-
-    private void renderArtists(List<Artist> data) {
-        items.clear();
-        if (data != null) {
-            for (Artist a : data) {
-                items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_ARTIST,
-                    a.getAvatarUrl(), a.getName(), "Nghệ sĩ",
-                    () -> openArtist(a)));
-            }
-        }
-        appendActions();
-        adapter.notifyDataSetChanged();
-    }
-
-    private void renderLiked(List<Track> data) {
-        items.clear();
-        if (data != null) {
-            for (Track t : data) {
-                items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_TRACK,
-                    t.getCoverUrl(), t.getTitle(), t.getArtistName(),
-                    () -> openPlayer(t)));
-            }
+        switch (c) {
+            case ALL:
+                addPlaylists(vm.playlists().getValue());
+                addArtists(vm.artists().getValue());
+                break;
+            case PLAYLIST:
+                addPlaylists(vm.playlists().getValue());
+                break;
+            case ARTIST:
+                addArtists(vm.artists().getValue());
+                break;
+            case LIKED:
+                addLiked(vm.liked().getValue());
+                break;
+            case ALBUM:
+            default:
+                break;
         }
         appendActions();
         adapter.notifyDataSetChanged();
     }
 
-    private void renderAlbumPlaceholder() {
-        items.clear();
-        appendActions();
-        adapter.notifyDataSetChanged();
+    private void addPlaylists(List<Playlist> data) {
+        if (data == null) return;
+        for (Playlist p : data) {
+            items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_PLAYLIST,
+                p.getCoverUrl(), p.getName(), "Danh sách phát",
+                () -> openPlaylist(p)));
+        }
+    }
+
+    private void addArtists(List<Artist> data) {
+        if (data == null) return;
+        for (Artist a : data) {
+            items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_ARTIST,
+                a.getAvatarUrl(), a.getName(), "Nghệ sĩ",
+                () -> openArtist(a)));
+        }
+    }
+
+    private void addLiked(List<Track> data) {
+        if (data == null) return;
+        for (Track t : data) {
+            items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_TRACK,
+                t.getCoverUrl(), t.getTitle(), t.getArtistName(),
+                () -> openPlayer(t)));
+        }
     }
 
     private void appendActions() {
-        items.add(LibraryAdapter.Item.action(R.drawable.ic_add, getString(R.string.add_artist), () -> {}));
+        items.add(LibraryAdapter.Item.action(R.drawable.ic_add, getString(R.string.add_artist), () ->
+            startActivity(new Intent(getContext(), AddArtistActivity.class))));
         items.add(LibraryAdapter.Item.action(R.drawable.ic_add, getString(R.string.add_podcast), () -> {}));
         items.add(LibraryAdapter.Item.action(R.drawable.ic_add, getString(R.string.add_event), () -> {}));
         items.add(LibraryAdapter.Item.action(R.drawable.ic_download, getString(R.string.add_music), () -> {}));
@@ -162,6 +172,12 @@ public class LibraryFragment extends Fragment {
         intent.putExtra("playlistId", p.getPlaylistId());
         intent.putExtra("playlistName", p.getName());
         startActivity(intent);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (vm != null) vm.refresh();
     }
 
     @Override

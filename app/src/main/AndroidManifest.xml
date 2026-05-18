@@ -33,7 +33,8 @@
         <activity android:name=".MainActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".PlayerActivity" android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MusicStreamingApp.Player"/>
         <activity android:name=".ArtistDetailActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".AlbumDetailActivity" android:exported="false"
@@ -55,6 +56,8 @@
         <activity android:name=".ListeningStatsActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".RecentActivity" android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".AddArtistActivity" android:exported="false"
             android:screenOrientation="portrait"/>
     </application>
 

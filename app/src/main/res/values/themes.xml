@@ -14,6 +14,17 @@
         <item name="bottomNavigationStyle">@style/BottomNavStyle</item>
     </style>
 
+    <style name="Theme.MusicStreamingApp.Player" parent="Theme.MusicStreamingApp">
+        <item name="android:windowAnimationStyle">@style/PlayerWindowAnimation</item>
+    </style>
+
+    <style name="PlayerWindowAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/player_slide_up</item>
+        <item name="android:activityOpenExitAnimation">@anim/player_no_anim</item>
+        <item name="android:activityCloseEnterAnimation">@anim/player_no_anim</item>
+        <item name="android:activityCloseExitAnimation">@anim/player_slide_down</item>
+    </style>
+
     <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="android:background">@color/bg_elevated</item>
         <item name="itemIconTint">@color/bottom_nav_tint</item>
@@ -82,6 +93,25 @@
         <item name="android:textColor">@color/text_secondary</item>
         <item name="android:textSize">13sp</item>
         <item name="android:layout_marginTop">2dp</item>
+    </style>
+
+    <style name="ArtistExpandedTitle" parent="TextAppearance.MaterialComponents.Headline4">
+        <item name="android:textColor">@color/accent_white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="AuthTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/bg_elevated</item>
+        <item name="boxStrokeColor">@color/field_stroke_color</item>
+        <item name="boxStrokeWidth">1.5dp</item>
+        <item name="hintTextColor">@color/field_hint_color</item>
+        <item name="android:textColorHint">@color/text_secondary</item>
+        <item name="endIconTint">@color/text_secondary</item>
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
     </style>
 
     <style name="RecentChip">

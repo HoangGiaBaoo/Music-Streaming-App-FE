@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.musicstreamingapp.AddArtistActivity;
 import com.example.musicstreamingapp.ArtistDetailActivity;
 import com.example.musicstreamingapp.adapter.ArtistListAdapter;
 import com.example.musicstreamingapp.databinding.FragmentFollowingArtistsBinding;
@@ -54,6 +55,9 @@ public class FollowingArtistsFragment extends Fragment {
             adapter.notifyDataSetChanged();
             b.tvEmpty.setVisibility(artists.isEmpty() ? View.VISIBLE : View.GONE);
         });
+
+        b.fabAddArtist.setOnClickListener(v ->
+            startActivity(new Intent(getContext(), AddArtistActivity.class)));
     }
 
     @Override

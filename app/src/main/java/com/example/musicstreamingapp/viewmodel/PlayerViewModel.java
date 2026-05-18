@@ -37,9 +37,11 @@ public class PlayerViewModel extends ViewModel implements PlayerManager.OnTrackC
     public PlayerViewModel(PlayerRepository repo) {
         this.repo = repo;
         PlayerManager.getInstance().setListener(this);
-        currentTrack.setValue(PlayerManager.getInstance().getCurrentTrack());
+        Track initial = PlayerManager.getInstance().getCurrentTrack();
+        currentTrack.setValue(initial);
         playing.setValue(PlayerManager.getInstance().isPlaying());
         handler.post(poller);
+        checkFollowForTrack(initial);
     }
 
     public LiveData<Track> currentTrack() { return currentTrack; }
@@ -85,7 +87,18 @@ public class PlayerViewModel extends ViewModel implements PlayerManager.OnTrackC
     public void onTrackChanged(Track track) {
         currentTrack.postValue(track);
         liked.postValue(false);
-        following.postValue(false);
+        checkFollowForTrack(track);
+    }
+
+    private void checkFollowForTrack(Track track) {
+        if (track == null || track.getArtist() == null || track.getArtist().getArtistId() == null) {
+            following.postValue(false);
+            return;
+        }
+        repo.checkFollowState(track.getArtist().getArtistId(), new RepoCallback<Boolean>() {
+            @Override public void onSuccess(Boolean data) { following.postValue(data); }
+            @Override public void onError(String message) { following.postValue(false); }
+        });
     }
 
     @Override
