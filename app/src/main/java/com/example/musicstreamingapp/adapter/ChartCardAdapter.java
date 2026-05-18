@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.util.ItemAnim;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class ChartCardAdapter extends RecyclerView.Adapter<ChartCardAdapter.VH> 
     public interface Click { void onClick(Playlist p); }
     private final List<Playlist> items;
     private final Click click;
+    private final int[] lastPosition = {-1};
     public ChartCardAdapter(List<Playlist> items, Click click) {
         this.items = items; this.click = click;
     }
@@ -34,6 +36,7 @@ public class ChartCardAdapter extends RecyclerView.Adapter<ChartCardAdapter.VH> 
         h.desc.setText(p.getDescription() != null ? p.getDescription()
             : "Thông tin cập nhật hàng ngày về những bản nhạc đ…");
         h.itemView.setOnClickListener(v -> click.onClick(p));
+        ItemAnim.animate(h.itemView, pos, lastPosition);
     }
 
     @Override public int getItemCount() { return items.size(); }

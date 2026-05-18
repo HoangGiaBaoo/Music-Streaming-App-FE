@@ -20,6 +20,7 @@ import com.example.musicstreamingapp.model.HomeSection;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.ItemAnim;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class HomeFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private final List<HomeSection> sections;
     private final OnHomeItemClick listener;
+    private final int[] lastPosition = {-1};
 
     public HomeFeedAdapter(List<HomeSection> sections, OnHomeItemClick listener) {
         this.sections = sections;
@@ -69,6 +71,7 @@ public class HomeFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (h instanceof FeaturedVH) ((FeaturedVH) h).bind(s);
         else if (h instanceof TrackListVH) ((TrackListVH) h).bind(s);
         else ((SectionVH) h).bind(s);
+        ItemAnim.animate(h.itemView, position, lastPosition);
     }
 
     @Override public int getItemCount() { return sections.size(); }

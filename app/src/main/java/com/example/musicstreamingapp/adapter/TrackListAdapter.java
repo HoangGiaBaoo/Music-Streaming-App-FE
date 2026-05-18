@@ -14,12 +14,14 @@ import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.ItemAnim;
 
 import java.util.List;
 
 public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> {
     private final List<Track> tracks;
     private final OnTrackClickListener listener;
+    private final int[] lastPosition = {-1};
 
     public interface OnTrackClickListener {
         void onTrackClick(Track track, int position);
@@ -54,6 +56,7 @@ public class TrackListAdapter extends RecyclerView.Adapter<TrackListAdapter.VH> 
             h.cover.setImageResource(R.drawable.placeholder_gradient);
         }
         h.itemView.setOnClickListener(v -> listener.onTrackClick(t, h.getAdapterPosition()));
+        ItemAnim.animate(h.itemView, pos, lastPosition);
     }
 
     @Override public int getItemCount() { return tracks.size(); }

@@ -11,12 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.util.ItemAnim;
 
 import java.util.List;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.VH> {
     private final List<Playlist> playlists;
     private final OnPlaylistClickListener listener;
+    private final int[] lastPosition = {-1};
 
     public interface OnPlaylistClickListener {
         void onPlaylistClick(Playlist playlist);
@@ -40,6 +42,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.VH> {
         h.name.setText(p.getName());
         h.icon.setImageResource(R.drawable.ic_library);
         h.itemView.setOnClickListener(v -> listener.onPlaylistClick(p));
+        ItemAnim.animate(h.itemView, pos, lastPosition);
     }
 
     @Override public int getItemCount() { return playlists.size(); }

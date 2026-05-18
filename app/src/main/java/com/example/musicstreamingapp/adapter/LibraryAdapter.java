@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.ItemAnim;
 
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private final List<Item> items;
+    private final int[] lastPosition = {-1};
     public LibraryAdapter(List<Item> items) { this.items = items; }
 
     @Override public int getItemViewType(int position) { return items.get(position).type; }
@@ -63,6 +65,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (h instanceof RowVH) ((RowVH) h).bind(it);
         else if (h instanceof ArtistVH) ((ArtistVH) h).bind(it);
         else ((ActionVH) h).bind(it);
+        ItemAnim.animate(h.itemView, pos, lastPosition);
     }
 
     @Override public int getItemCount() { return items.size(); }
