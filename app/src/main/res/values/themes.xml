@@ -42,6 +42,11 @@
         <item name="cornerSize">4dp</item>
     </style>
 
+    <style name="ShapeAppearance.PlayerCover" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
     <style name="CollapsingToolbarStyle" parent="Widget.MaterialComponents.CollapsingToolbar">
         <item name="expandedTitleTextAppearance">@style/ExpandedTitleStyle</item>
     </style>

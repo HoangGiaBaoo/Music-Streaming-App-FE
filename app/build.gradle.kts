@@ -68,6 +68,9 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation(libs.lifecycle.runtime)
 
+    // Palette - extract dominant color from album cover for Player gradient
+    implementation(libs.palette)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

@@ -3,20 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="@color/spotify_black">
 
-    <!-- Blurred bg -->
+    <!-- Palette gradient background (set programmatically từ màu cover) -->
     <ImageView
         android:id="@+id/iv_bg_blur"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:alpha="0.5"
-        android:scaleType="centerCrop"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#A6000000"/>
+        android:scaleType="fitXY"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -86,12 +80,12 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp">
 
-                <ImageView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_cover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/placeholder_gradient"
-                    android:scaleType="centerCrop"/>
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.PlayerCover"/>
 
                 <!-- Lyrics teaser overlay -->
                 <TextView

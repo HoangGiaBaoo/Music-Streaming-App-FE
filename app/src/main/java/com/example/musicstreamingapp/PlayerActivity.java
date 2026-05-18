@@ -1,18 +1,28 @@
 package com.example.musicstreamingapp;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.musicstreamingapp.adapter.ExploreArtistAdapter;
 import com.example.musicstreamingapp.databinding.ActivityPlayerBinding;
 import com.example.musicstreamingapp.model.Track;
@@ -27,8 +37,6 @@ import com.example.musicstreamingapp.viewmodel.VmFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
 
 public class PlayerActivity extends AppCompatActivity {
 
@@ -194,12 +202,17 @@ public class PlayerActivity extends AppCompatActivity {
             Glide.with(this).load(url)
                 .placeholder(R.drawable.placeholder_gradient)
                 .centerCrop().into(b.ivCover);
-            Glide.with(this).load(url)
-                .transform(new BlurTransformation(25, 3))
-                .into(b.ivBgBlur);
+            // Extract dominant color → set as background gradient (Spotify-style)
+            Glide.with(this).asBitmap().load(url).into(new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> t) {
+                    applyPaletteGradient(resource);
+                }
+                @Override public void onLoadCleared(@Nullable android.graphics.drawable.Drawable placeholder) { }
+            });
         } else {
             b.ivCover.setImageResource(R.drawable.placeholder_gradient);
-            b.ivBgBlur.setImageResource(R.drawable.placeholder_gradient);
+            b.ivBgBlur.setImageDrawable(null);
         }
 
         if (track.getArtist() != null && track.getArtist().getAvatarUrl() != null) {
@@ -229,8 +242,42 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void renderPlayState(Boolean isPlaying) {
-        b.btnPlayPause.setImageResource(
-            Boolean.TRUE.equals(isPlaying) ? R.drawable.ic_pause : R.drawable.ic_play);
+        boolean playing = Boolean.TRUE.equals(isPlaying);
+        b.btnPlayPause.setImageResource(playing ? R.drawable.ic_pause : R.drawable.ic_play);
+        animateCover(playing);
+    }
+
+    /**
+     * Set FrameLayout background to a vertical gradient from the cover's dominant
+     * color (top) → spotify_black (bottom). Falls back to solid black if Palette
+     * can't extract a meaningful color.
+     */
+    private void applyPaletteGradient(Bitmap bitmap) {
+        Palette.from(bitmap).generate(palette -> {
+            if (palette == null) return;
+            int top = palette.getDarkVibrantColor(
+                palette.getDarkMutedColor(0xFF1E1E1E));
+            int bottom = 0xFF121212; // spotify_black
+            GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{ top, bottom });
+            b.ivBgBlur.setImageDrawable(gd);
+        });
+    }
+
+    /**
+     * Spotify-style cover scale: 0.85 (paused/idle) ↔ 1.0 (playing) với
+     * OvershootInterpolator nhẹ.
+     */
+    private void animateCover(boolean playing) {
+        float target = playing ? 1.0f : 0.85f;
+        ObjectAnimator sx = ObjectAnimator.ofFloat(b.ivCover, "scaleX", b.ivCover.getScaleX(), target);
+        ObjectAnimator sy = ObjectAnimator.ofFloat(b.ivCover, "scaleY", b.ivCover.getScaleY(), target);
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(sx, sy);
+        set.setDuration(300);
+        set.setInterpolator(new OvershootInterpolator(1.4f));
+        set.start();
     }
 
     private void renderProgress(long[] posDur) {
