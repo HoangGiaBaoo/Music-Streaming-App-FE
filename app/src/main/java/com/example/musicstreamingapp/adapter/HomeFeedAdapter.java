@@ -1,6 +1,7 @@
 package com.example.musicstreamingapp.adapter;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -130,6 +131,17 @@ public class HomeFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             title.setText(s.getTitle() != null ? s.getTitle() : "");
             Context ctx = itemView.getContext();
             String kind = s.getKind();
+            while (rv.getItemDecorationCount() > 0) rv.removeItemDecorationAt(0);
+            more.setVisibility(View.GONE);
+            rv.setNestedScrollingEnabled(true);
+            if (HomeSection.RECENTLY_PLAYED.equals(kind)) {
+                more.setVisibility(View.VISIBLE);
+                rv.setLayoutManager(new GridLayoutManager(ctx, 2));
+                rv.addItemDecoration(new RecentGridSpacing(ctx, 8));
+                rv.setNestedScrollingEnabled(false);
+                rv.setAdapter(new RecentTileAdapter(s.asPlaylists(RetrofitClient.GSON), listener::onPlaylist));
+                return;
+            }
             rv.setLayoutManager(new LinearLayoutManager(ctx, RecyclerView.HORIZONTAL, false));
             switch (kind == null ? "" : kind) {
                 case HomeSection.RADIO:
@@ -145,15 +157,29 @@ public class HomeFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 case HomeSection.RECOMMENDED:
                     rv.setAdapter(new AlbumLabelAdapter(s.asAlbums(RetrofitClient.GSON), listener::onAlbum));
                     break;
-                case HomeSection.RECENTLY_PLAYED:
-                    more.setVisibility(View.VISIBLE);
-                    rv.setAdapter(new PlaylistCardAdapter(s.asPlaylists(RetrofitClient.GSON), listener::onPlaylist));
-                    break;
                 default:
                     // TOP_PICKS / MOOD_PLAYLIST / others -> playlist cards
                     rv.setAdapter(new PlaylistCardAdapter(s.asPlaylists(RetrofitClient.GSON), listener::onPlaylist));
                     break;
             }
+        }
+    }
+
+    static class RecentGridSpacing extends RecyclerView.ItemDecoration {
+        private final int gapPx;
+        RecentGridSpacing(Context ctx, int gapDp) {
+            this.gapPx = Math.round(gapDp * ctx.getResources().getDisplayMetrics().density);
+        }
+        @Override
+        public void getItemOffsets(@NonNull Rect out, @NonNull View view,
+                                   @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+            int pos = parent.getChildAdapterPosition(view);
+            if (pos == RecyclerView.NO_POSITION) return;
+            int col = pos % 2;
+            int half = gapPx / 2;
+            out.left = col == 0 ? 0 : half;
+            out.right = col == 0 ? half : 0;
+            out.bottom = gapPx;
         }
     }
 }
