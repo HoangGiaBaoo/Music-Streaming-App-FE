@@ -40,6 +40,7 @@ public class HomeFragment extends Fragment implements HomeFeedAdapter.OnHomeItem
     private MainViewModel mainVm;
     private final List<HomeSection> sections = new ArrayList<>();
     private HomeFeedAdapter adapter;
+    private boolean shimmerHidden = false;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -71,15 +72,26 @@ public class HomeFragment extends Fragment implements HomeFeedAdapter.OnHomeItem
         adapter = new HomeFeedAdapter(sections, this);
         b.rvHomeFeed.setAdapter(adapter);
 
+        b.shimmerHome.startShimmer();
+        b.shimmerHome.postDelayed(this::hideShimmer, 4000);
+
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(HomeViewModel.class);
         vm.sections().observe(getViewLifecycleOwner(), data -> {
             sections.clear();
             if (data != null) sections.addAll(data);
             adapter.notifyDataSetChanged();
+            if (data != null && !data.isEmpty()) hideShimmer();
         });
         // Match original behavior: silently ignore feed errors (HTTP non-2xx + network failures)
-        vm.errorEvent().observe(getViewLifecycleOwner(), e -> e.consume(msg -> { }));
+        vm.errorEvent().observe(getViewLifecycleOwner(), e -> e.consume(msg -> hideShimmer()));
         vm.loadIfNeeded();
+    }
+
+    private void hideShimmer() {
+        if (shimmerHidden || b == null) return;
+        shimmerHidden = true;
+        b.shimmerHome.stopShimmer();
+        b.shimmerHome.setVisibility(View.GONE);
     }
 
     private void selectChip(TextView active, String filter) {

@@ -71,6 +71,9 @@ dependencies {
     // Palette - extract dominant color from album cover for Player gradient
     implementation(libs.palette)
 
+    // Facebook Shimmer - loading skeleton placeholders
+    implementation(libs.shimmer)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
