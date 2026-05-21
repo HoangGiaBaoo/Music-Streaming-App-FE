@@ -3,6 +3,7 @@ package com.example.musicstreamingapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +29,7 @@ public class AlbumDetailActivity extends AppCompatActivity {
     private AlbumDetailViewModel vm;
     private final List<Track> tracks = new ArrayList<>();
     private TrackDetailAdapter adapter;
+    private boolean shimmerHidden = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,9 @@ public class AlbumDetailActivity extends AppCompatActivity {
             }
         });
 
+        b.shimmerAlbum.getRoot().startShimmer();
+        b.shimmerAlbum.getRoot().postDelayed(this::hideShimmer, 4000);
+
         vm = new ViewModelProvider(this, new VmFactory(this)).get(AlbumDetailViewModel.class);
         vm.setAlbumId(albumId);
         observeViewModel();
@@ -62,9 +67,21 @@ public class AlbumDetailActivity extends AppCompatActivity {
 
     private void observeViewModel() {
         vm.album().observe(this, this::renderAlbum);
-        vm.tracks().observe(this, this::renderTracks);
-        vm.errorEvent().observe(this, e -> e.consume(msg ->
-            Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show()));
+        vm.tracks().observe(this, data -> {
+            renderTracks(data);
+            if (data != null) hideShimmer();
+        });
+        vm.errorEvent().observe(this, e -> e.consume(msg -> {
+            hideShimmer();
+            Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show();
+        }));
+    }
+
+    private void hideShimmer() {
+        if (shimmerHidden) return;
+        shimmerHidden = true;
+        b.shimmerAlbum.getRoot().stopShimmer();
+        b.shimmerAlbum.getRoot().setVisibility(View.GONE);
     }
 
     private void renderAlbum(Album a) {

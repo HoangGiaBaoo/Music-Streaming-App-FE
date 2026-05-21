@@ -164,13 +164,22 @@
                 android:textSize="20sp"
                 android:textStyle="bold"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_browse_all"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:paddingHorizontal="12dp"/>
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_browse_all"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="12dp"/>
+
+                <include
+                    android:id="@+id/shimmer_search_grid"
+                    layout="@layout/layout_shimmer_genre_grid"/>
+            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

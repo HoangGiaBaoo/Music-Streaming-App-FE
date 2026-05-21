@@ -103,6 +103,10 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"/>
 
+            <include
+                android:id="@+id/shimmer_playlist"
+                layout="@layout/layout_shimmer_track_list"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

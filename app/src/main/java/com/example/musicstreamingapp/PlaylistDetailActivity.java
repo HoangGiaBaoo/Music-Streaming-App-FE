@@ -3,6 +3,7 @@ package com.example.musicstreamingapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -25,6 +26,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     private PlaylistDetailViewModel vm;
     private final List<Track> tracks = new ArrayList<>();
     private TrackDetailAdapter adapter;
+    private boolean shimmerHidden = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,9 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             }
         });
 
+        b.shimmerPlaylist.getRoot().startShimmer();
+        b.shimmerPlaylist.getRoot().postDelayed(this::hideShimmer, 4000);
+
         vm = new ViewModelProvider(this, new VmFactory(this)).get(PlaylistDetailViewModel.class);
         vm.setPlaylistId(playlistId);
         observeViewModel();
@@ -65,9 +70,19 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             tracks.clear();
             if (data != null) tracks.addAll(data);
             adapter.notifyDataSetChanged();
+            if (data != null) hideShimmer();
         });
-        vm.errorEvent().observe(this, e -> e.consume(msg ->
-            Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show()));
+        vm.errorEvent().observe(this, e -> e.consume(msg -> {
+            hideShimmer();
+            Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show();
+        }));
+    }
+
+    private void hideShimmer() {
+        if (shimmerHidden) return;
+        shimmerHidden = true;
+        b.shimmerPlaylist.getRoot().stopShimmer();
+        b.shimmerPlaylist.getRoot().setVisibility(View.GONE);
     }
 
     @Override

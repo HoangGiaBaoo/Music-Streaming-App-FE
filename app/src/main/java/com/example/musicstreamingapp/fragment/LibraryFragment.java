@@ -40,6 +40,7 @@ public class LibraryFragment extends Fragment {
     private MainViewModel mainVm;
     private final List<LibraryAdapter.Item> items = new ArrayList<>();
     private LibraryAdapter adapter;
+    private boolean shimmerHidden = false;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -70,12 +71,22 @@ public class LibraryFragment extends Fragment {
         adapter = new LibraryAdapter(items);
         b.rvLibrary.setAdapter(adapter);
 
+        b.shimmerLibrary.getRoot().startShimmer();
+        b.shimmerLibrary.getRoot().postDelayed(this::hideShimmer, 4000);
+
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(LibraryViewModel.class);
 
         vm.chip().observe(getViewLifecycleOwner(), c -> { renderChipState(c); renderCurrent(); });
-        vm.playlists().observe(getViewLifecycleOwner(), data -> renderCurrent());
-        vm.artists().observe(getViewLifecycleOwner(), data -> renderCurrent());
-        vm.liked().observe(getViewLifecycleOwner(), data -> renderCurrent());
+        vm.playlists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
+        vm.artists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
+        vm.liked().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
+    }
+
+    private void hideShimmer() {
+        if (shimmerHidden || b == null) return;
+        shimmerHidden = true;
+        b.shimmerLibrary.getRoot().stopShimmer();
+        b.shimmerLibrary.getRoot().setVisibility(View.GONE);
     }
 
     private void renderChipState(Chip c) {

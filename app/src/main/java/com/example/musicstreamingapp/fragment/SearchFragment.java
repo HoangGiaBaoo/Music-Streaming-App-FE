@@ -40,6 +40,7 @@ public class SearchFragment extends Fragment {
 
     private final List<Track> trackResults = new ArrayList<>();
     private HomeTrackRowAdapter resultsAdapter;
+    private boolean shimmerHidden = false;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -84,12 +85,24 @@ public class SearchFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
+        b.shimmerSearchGrid.getRoot().startShimmer();
+        b.shimmerSearchGrid.getRoot().postDelayed(this::hideShimmer, 4000);
+
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(SearchViewModel.class);
         vm.trackResults().observe(getViewLifecycleOwner(), this::renderResults);
-        vm.genres().observe(getViewLifecycleOwner(), genres ->
-            b.rvBrowseAll.setAdapter(new GenreTileAdapter(genres, g -> {})));
+        vm.genres().observe(getViewLifecycleOwner(), genres -> {
+            b.rvBrowseAll.setAdapter(new GenreTileAdapter(genres, g -> {}));
+            if (genres != null && !genres.isEmpty()) hideShimmer();
+        });
         vm.showingResults().observe(getViewLifecycleOwner(), this::renderModeSwitch);
         vm.loadGenresIfNeeded();
+    }
+
+    private void hideShimmer() {
+        if (shimmerHidden || b == null) return;
+        shimmerHidden = true;
+        b.shimmerSearchGrid.getRoot().stopShimmer();
+        b.shimmerSearchGrid.getRoot().setVisibility(View.GONE);
     }
 
     private void renderResults(List<Track> tracks) {
