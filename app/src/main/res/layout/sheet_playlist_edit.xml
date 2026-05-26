@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/spotify_dark"
+    android:orientation="vertical"
+    android:paddingBottom="16dp">
+
+    <!-- Top bar: Hủy | Title | Lưu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/cancel"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/playlist_name_and_details"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/btn_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="@string/save"
+            android:textColor="@color/spotify_green"
+            android:textSize="15sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Cover preview + name input -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp">
+
+        <FrameLayout
+            android:id="@+id/cover_preview_container"
+            android:layout_width="120dp"
+            android:layout_height="120dp">
+
+            <com.example.musicstreamingapp.ui.PlaylistCoverView
+                android:id="@+id/cover_preview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_edit"
+                android:tint="@color/accent_white"/>
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/et_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/bg_edit_field"
+            android:inputType="text"
+            android:maxLines="2"
+            android:padding="12dp"
+            android:textColor="@color/accent_white"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- Privacy toggle row -->
+    <LinearLayout
+        android:id="@+id/row_privacy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_lock_outline"
+            android:tint="@color/accent_white"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:text="@string/set_private"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/sw_private"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"/>
+    </LinearLayout>
+
+    <!-- Delete playlist row -->
+    <LinearLayout
+        android:id="@+id/row_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/ic_delete"
+            android:tint="@color/accent_white"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:text="@string/delete_playlist"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+    </LinearLayout>
+</LinearLayout>

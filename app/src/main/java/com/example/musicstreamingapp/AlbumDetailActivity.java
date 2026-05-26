@@ -87,10 +87,13 @@ public class AlbumDetailActivity extends AppCompatActivity {
     private void renderAlbum(Album a) {
         if (a == null) return;
         b.collapsingToolbar.setTitle(a.getTitle());
-        if (a.getCoverUrl() != null) {
+        if (a.getCoverUrl() != null && !a.getCoverUrl().isEmpty()) {
             Glide.with(this)
                 .load(RetrofitClient.BASE_MEDIA_URL + a.getCoverUrl())
-                .centerCrop().into(b.ivCover);
+                .placeholder(R.drawable.placeholder_gradient)
+                .error(R.drawable.placeholder_gradient)
+                .centerCrop()
+                .into(b.ivCover);
         }
         if (a.getArtist() != null) b.tvArtistName.setText(a.getArtist().getName());
     }

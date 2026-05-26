@@ -116,6 +116,10 @@ public interface ApiService {
     @GET("api/playlists/{id}/tracks") Call<List<Track>> getPlaylistTracks(@Path("id") Long id);
     @POST("api/playlists/{id}/tracks") Call<Map<String, String>> addTrackToPlaylist(@Path("id") Long id, @Query("trackId") Long trackId);
     @DELETE("api/playlists/{id}/tracks/{trackId}") Call<Map<String, String>> removeTrackFromPlaylist(@Path("id") Long id, @Path("trackId") Long trackId);
+    @PUT("api/playlists/{id}") Call<Playlist> updatePlaylist(@Path("id") Long id, @Body PlaylistRequest body);
+    @DELETE("api/playlists/{id}") Call<Void> deletePlaylist(@Path("id") Long id);
+    @Multipart @POST("api/playlists/{id}/cover")
+    Call<Map<String, String>> uploadPlaylistCover(@Path("id") Long id, @Part MultipartBody.Part file);
 
     // Charts
     @GET("api/charts/tracks") Call<List<Track>> getChartTracks(@Query("limit") Integer limit);

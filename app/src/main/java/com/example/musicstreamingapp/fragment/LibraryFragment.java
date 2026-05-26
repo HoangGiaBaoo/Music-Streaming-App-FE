@@ -21,10 +21,13 @@ import com.example.musicstreamingapp.PlayerActivity;
 import com.example.musicstreamingapp.PlaylistDetailActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.LibraryAdapter;
+import com.example.musicstreamingapp.data.repository.LibraryRepository;
 import com.example.musicstreamingapp.databinding.FragmentLibraryBinding;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
+import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.LibraryViewModel;
 import com.example.musicstreamingapp.viewmodel.LibraryViewModel.Chip;
 import com.example.musicstreamingapp.viewmodel.MainViewModel;
@@ -68,7 +71,9 @@ public class LibraryFragment extends Fragment {
         b.libChipLiked.setOnClickListener(v ->    vm.onChipSelected(Chip.LIKED));
 
         b.rvLibrary.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new LibraryAdapter(items);
+        LibraryRepository repo = new LibraryRepository(
+            RetrofitClient.getApiService(TokenManager.getPrefs(requireContext())));
+        adapter = new LibraryAdapter(items, repo);
         b.rvLibrary.setAdapter(adapter);
 
         b.shimmerLibrary.getRoot().startShimmer();
@@ -134,8 +139,8 @@ public class LibraryFragment extends Fragment {
     private void addPlaylists(List<Playlist> data) {
         if (data == null) return;
         for (Playlist p : data) {
-            items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_PLAYLIST,
-                p.getCoverUrl(), p.getName(), "Danh sách phát",
+            items.add(LibraryAdapter.Item.playlistRow(
+                p.getPlaylistId(), p.getCoverUrl(), p.getName(), "Danh sách phát",
                 () -> openPlaylist(p)));
         }
     }

@@ -17,8 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.musicstreamingapp.PlaylistDetailActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.PlaylistAdapter;
+import com.example.musicstreamingapp.data.repository.LibraryRepository;
 import com.example.musicstreamingapp.databinding.FragmentPlaylistsBinding;
 import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.PlaylistsViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
@@ -43,7 +46,9 @@ public class PlaylistsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         b.rvPlaylists.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new PlaylistAdapter(playlists, playlist -> {
+        LibraryRepository repo = new LibraryRepository(
+            RetrofitClient.getApiService(TokenManager.getPrefs(requireContext())));
+        adapter = new PlaylistAdapter(playlists, repo, playlist -> {
             Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
             intent.putExtra("playlistId", playlist.getPlaylistId());
             intent.putExtra("playlistName", playlist.getName());

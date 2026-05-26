@@ -12,6 +12,9 @@ import com.example.musicstreamingapp.network.ApiService;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,6 +80,10 @@ public class LibraryRepository {
         enqueue(api.getMyPlaylists(), cb);
     }
 
+    public void getPlaylist(long playlistId, RepoCallback<Playlist> cb) {
+        enqueue(api.getPlaylist(playlistId), cb);
+    }
+
     public void getPlaylistTracks(long playlistId, RepoCallback<List<Track>> cb) {
         enqueue(api.getPlaylistTracks(playlistId), cb);
     }
@@ -94,6 +101,44 @@ public class LibraryRepository {
 
     public void removeTrackFromPlaylist(long playlistId, long trackId, RepoCallback<Boolean> cb) {
         api.removeTrackFromPlaylist(playlistId, trackId).enqueue(boolCb(cb));
+    }
+
+    public void updatePlaylist(long playlistId, String name, Boolean isPublic, RepoCallback<Playlist> cb) {
+        PlaylistRequest req = new PlaylistRequest();
+        req.name = name;
+        req.isPublic = isPublic;
+        enqueue(api.updatePlaylist(playlistId, req), cb);
+    }
+
+    public void deletePlaylist(long playlistId, RepoCallback<Boolean> cb) {
+        api.deletePlaylist(playlistId).enqueue(new Callback<Void>() {
+            @Override public void onResponse(Call<Void> c, Response<Void> r) {
+                if (r.isSuccessful()) cb.onSuccess(true);
+                else cb.onError("HTTP " + r.code());
+            }
+            @Override public void onFailure(Call<Void> c, Throwable t) {
+                cb.onError(safeMessage(t));
+            }
+        });
+    }
+
+    public void uploadPlaylistCover(long playlistId, byte[] bytes, String mime, RepoCallback<String> cb) {
+        String safeMime = mime == null ? "image/jpeg" : mime;
+        String filename = safeMime.contains("png") ? "cover.png" : "cover.jpg";
+        RequestBody body = RequestBody.create(bytes, MediaType.parse(safeMime));
+        MultipartBody.Part part = MultipartBody.Part.createFormData("file", filename, body);
+        api.uploadPlaylistCover(playlistId, part).enqueue(new Callback<Map<String, String>>() {
+            @Override public void onResponse(Call<Map<String, String>> c, Response<Map<String, String>> r) {
+                if (r.isSuccessful() && r.body() != null && r.body().get("coverUrl") != null) {
+                    cb.onSuccess(r.body().get("coverUrl"));
+                } else {
+                    cb.onError("HTTP " + r.code());
+                }
+            }
+            @Override public void onFailure(Call<Map<String, String>> c, Throwable t) {
+                cb.onError(safeMessage(t));
+            }
+        });
     }
 
     // ---- Recent --------------------------------------------------------

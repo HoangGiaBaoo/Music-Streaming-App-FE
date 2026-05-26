@@ -10,16 +10,22 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv_cover"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_cover"
         android:layout_width="@dimen/playlist_cover"
         android:layout_height="@dimen/playlist_cover"
-        android:scaleType="centerCrop"
-        android:background="@color/spotify_elevated"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Spotify.Rounded4"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.example.musicstreamingapp.ui.PlaylistCoverView
+            android:id="@+id/cover_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tv_name"
@@ -33,7 +39,7 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/tv_count"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/iv_cover"
+        app:layout_constraintStart_toEndOf="@id/card_cover"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"/>
 
@@ -47,7 +53,7 @@
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/iv_cover"
+        app:layout_constraintStart_toEndOf="@id/card_cover"
         app:layout_constraintTop_toBottomOf="@id/tv_name"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

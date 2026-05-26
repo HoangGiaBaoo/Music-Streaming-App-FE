@@ -8,8 +8,10 @@
     android:fitsSystemWindows="true">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/collapsing_appbar_height"
+        android:layout_height="280dp"
+        android:background="@color/spotify_black"
         android:fitsSystemWindows="true"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
@@ -18,25 +20,19 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:contentScrim="@color/bg_secondary"
+            app:contentScrim="@color/spotify_black"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:expandedTitleMarginStart="16dp"
             app:expandedTitleMarginBottom="16dp"
             app:collapsedTitleTextAppearance="@style/ExpandedTitleStyle">
 
-            <ImageView
-                android:id="@+id/iv_cover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:fitsSystemWindows="true"
-                android:background="@drawable/placeholder_gradient"
-                app:layout_collapseMode="parallax"/>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#66000000"
+            <com.example.musicstreamingapp.ui.PlaylistCoverView
+                android:id="@+id/cover_view"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="64dp"
+                android:elevation="8dp"
                 app:layout_collapseMode="parallax"/>
 
             <androidx.appcompat.widget.Toolbar
@@ -61,40 +57,54 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Action buttons -->
+            <!-- Action row: Thay đổi (left) · shuffle + play FAB (right) -->
             <LinearLayout
+                android:id="@+id/row_actions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="16dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp"
-                android:gravity="center_vertical">
+                android:paddingTop="12dp"
+                android:paddingBottom="8dp">
 
-                <Button
-                    android:id="@+id/btn_play_all"
-                    android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_button_green"
-                    android:text="@string/play_all"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_edit_details"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:minHeight="0dp"
+                    android:paddingHorizontal="14dp"
+                    android:text="@string/change"
                     android:textColor="@color/accent_white"
-                    android:textStyle="bold"
-                    android:textAllCaps="true"/>
+                    android:textSize="13sp"
+                    app:strokeColor="@color/divider"/>
 
-                <Button
-                    android:id="@+id/btn_add_track"
+                <View
                     android:layout_width="0dp"
-                    android:layout_height="48dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="12dp"
-                    android:background="@drawable/bg_button_outline"
-                    android:text="@string/add_to_playlist"
-                    android:textColor="@color/spotify_green"
-                    android:textStyle="bold"
-                    android:textAllCaps="true"
-                    android:textSize="11sp"/>
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
 
+                <ImageButton
+                    android:id="@+id/btn_shuffle"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/shuffle"
+                    android:src="@drawable/ic_shuffle"
+                    android:tint="@color/spotify_green"/>
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/btn_play_fab"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:contentDescription="@string/play_all"
+                    android:src="@drawable/ic_play"
+                    app:backgroundTint="@color/spotify_green"
+                    app:elevation="6dp"
+                    app:fabSize="normal"
+                    app:tint="@color/accent_white"/>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -102,6 +112,43 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"/>
+
+            <!-- Empty state: shown only when this playlist has zero tracks. -->
+            <LinearLayout
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/add_to_this_playlist"
+                    android:textColor="@color/accent_white"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/suggested_tracks"
+                    android:textColor="@color/accent_white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_suggestions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"/>
+            </LinearLayout>
 
             <include
                 android:id="@+id/shimmer_playlist"

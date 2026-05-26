@@ -11,8 +11,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.model.Genre;
+import com.example.musicstreamingapp.network.RetrofitClient;
 
 import java.util.List;
 
@@ -45,6 +47,17 @@ public class GenreTileAdapter extends RecyclerView.Adapter<GenreTileAdapter.VH> 
         gd.setColor(color);
         gd.setCornerRadius(12f);
         h.itemView.setBackground(gd);
+
+        String coverUrl = g.getCoverUrl();
+        if (coverUrl != null && !coverUrl.isEmpty()) {
+            h.pic.setVisibility(View.VISIBLE);
+            Glide.with(h.itemView)
+                .load(RetrofitClient.BASE_MEDIA_URL + coverUrl)
+                .centerCrop()
+                .into(h.pic);
+        } else {
+            h.pic.setVisibility(View.GONE);
+        }
         h.itemView.setOnClickListener(v -> click.onClick(g));
     }
 

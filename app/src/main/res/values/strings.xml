@@ -82,8 +82,21 @@
 
     <!-- Common -->
     <string name="cancel">Huỷ</string>
+    <string name="save">Lưu</string>
     <string name="create">Tạo</string>
     <string name="add_to_playlist">Thêm vào playlist</string>
+
+    <!-- Playlist edit / cover picker -->
+    <string name="playlist_name_and_details">Tên và thông tin chi tiết</string>
+    <string name="set_private">Đặt thành riêng tư</string>
+    <string name="delete_playlist">Xoá danh sách phát</string>
+    <string name="change_cover">Thay đổi ảnh bìa</string>
+    <string name="change">Thay đổi</string>
+    <string name="add_to_this_playlist">Thêm vào danh sách phát này</string>
+    <string name="suggested_tracks">Các bài hát được đề xuất</string>
+    <string name="delete_playlist_confirm">Xoá danh sách phát này?</string>
+    <string name="delete">Xoá</string>
+    <string name="playlist_updated">Đã cập nhật danh sách phát</string>
     <string name="new_playlist">Playlist mới</string>
     <string name="playlist_name">Tên playlist</string>
     <string name="error_network">Lỗi kết nối mạng</string>

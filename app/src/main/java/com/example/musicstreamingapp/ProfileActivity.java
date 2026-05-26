@@ -10,8 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.adapter.PlaylistAdapter;
+import com.example.musicstreamingapp.data.repository.LibraryRepository;
 import com.example.musicstreamingapp.databinding.ActivityProfileBinding;
 import com.example.musicstreamingapp.model.UserProfile;
+import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.ProfileViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
@@ -86,7 +89,9 @@ public class ProfileActivity extends AppCompatActivity {
         } else {
             b.rvPlaylists.setVisibility(View.VISIBLE);
             b.emptyState.setVisibility(View.GONE);
-            b.rvPlaylists.setAdapter(new PlaylistAdapter(p.playlists, pl -> {
+            LibraryRepository repo = new LibraryRepository(
+                RetrofitClient.getApiService(TokenManager.getPrefs(getApplicationContext())));
+            b.rvPlaylists.setAdapter(new PlaylistAdapter(p.playlists, repo, pl -> {
                 Intent i = new Intent(this, PlaylistDetailActivity.class);
                 i.putExtra("playlistId", pl.getPlaylistId());
                 startActivity(i);
