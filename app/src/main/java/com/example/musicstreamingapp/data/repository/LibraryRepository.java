@@ -3,6 +3,7 @@ package com.example.musicstreamingapp.data.repository;
 import com.example.musicstreamingapp.data.RepoCallback;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
+import com.example.musicstreamingapp.model.GenreFeedDto;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.PlaylistRequest;
 import com.example.musicstreamingapp.model.RecentItem;
@@ -139,6 +140,12 @@ public class LibraryRepository {
                 cb.onError(safeMessage(t));
             }
         });
+    }
+
+    // ---- Genres --------------------------------------------------------
+
+    public void getGenreFeed(long genreId, RepoCallback<GenreFeedDto> cb) {
+        enqueue(api.getGenreFeed(genreId), cb);
     }
 
     // ---- Recent --------------------------------------------------------

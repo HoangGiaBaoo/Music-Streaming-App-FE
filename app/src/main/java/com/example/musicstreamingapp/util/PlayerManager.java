@@ -22,6 +22,8 @@ public class PlayerManager {
     private List<Track> queue = new ArrayList<>();
     private int currentIndex = 0;
     private OnTrackChangeListener listener;
+    /** Listener PHỤ chỉ phục vụ đếm quảng cáo — không bị UI ghi đè, không ảnh hưởng phát nhạc. */
+    private OnTrackChangeListener adListener;
 
     public interface OnTrackChangeListener {
         void onTrackChanged(Track track);
@@ -84,6 +86,7 @@ public class PlayerManager {
         player.prepare();
         player.play();
         if (listener != null) listener.onTrackChanged(track);
+        if (adListener != null) adListener.onTrackChanged(track);
     }
 
     public void playNext() {
@@ -96,6 +99,7 @@ public class PlayerManager {
         player.prepare();
         player.play();
         if (listener != null) listener.onTrackChanged(next);
+        if (adListener != null) adListener.onTrackChanged(next);
     }
 
     public void playPrevious() {
@@ -108,12 +112,21 @@ public class PlayerManager {
         player.prepare();
         player.play();
         if (listener != null) listener.onTrackChanged(prev);
+        if (adListener != null) adListener.onTrackChanged(prev);
     }
 
     public void togglePlayPause() {
         if (player == null) return;
         if (player.isPlaying()) player.pause();
         else player.play();
+    }
+
+    public void pause() {
+        if (player != null) player.pause();
+    }
+
+    public void resume() {
+        if (player != null) player.play();
     }
 
     public void seekTo(long ms) {
@@ -144,6 +157,9 @@ public class PlayerManager {
     public ExoPlayer getPlayer() { return player; }
 
     public void setListener(OnTrackChangeListener l) { this.listener = l; }
+
+    /** Gắn listener phụ cho đếm quảng cáo (tách biệt với listener UI). */
+    public void setAdListener(OnTrackChangeListener l) { this.adListener = l; }
 
     public void release() {
         if (player != null) { player.release(); player = null; }

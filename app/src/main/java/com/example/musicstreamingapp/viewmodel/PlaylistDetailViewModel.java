@@ -131,6 +131,14 @@ public class PlaylistDetailViewModel extends ViewModel {
         });
     }
 
+    /** Thêm/bỏ bài hát khỏi "Bài hát đã thích" (toggle). */
+    public void likeTrack(long trackId) {
+        repo.toggleLike(trackId, new RepoCallback<Boolean>() {
+            @Override public void onSuccess(Boolean data) { /* silent */ }
+            @Override public void onError(String message) { /* silent */ }
+        });
+    }
+
     public void onRemoveTrack(Track track, int position) {
         if (playlistId == null || track == null || track.getTrackId() == null) return;
         repo.removeTrackFromPlaylist(playlistId, track.getTrackId(), new RepoCallback<Boolean>() {

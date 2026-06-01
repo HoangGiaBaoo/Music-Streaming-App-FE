@@ -61,6 +61,9 @@ public class VmFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(RecentViewModel.class)) {
             return (T) new RecentViewModel(new LibraryRepository(api));
         }
+        if (modelClass.isAssignableFrom(GenreDetailViewModel.class)) {
+            return (T) new GenreDetailViewModel(new LibraryRepository(api));
+        }
         if (modelClass.isAssignableFrom(PlayerViewModel.class)) {
             return (T) new PlayerViewModel(new PlayerRepository(api));
         }

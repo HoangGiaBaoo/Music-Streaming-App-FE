@@ -20,7 +20,9 @@ import com.bumptech.glide.request.transition.Transition;
 import com.example.musicstreamingapp.adapter.SuggestedTrackAdapter;
 import com.example.musicstreamingapp.adapter.TrackDetailAdapter;
 import com.example.musicstreamingapp.databinding.ActivityPlaylistDetailBinding;
+import com.example.musicstreamingapp.fragment.AddToPlaylistBottomSheet;
 import com.example.musicstreamingapp.fragment.PlaylistEditBottomSheet;
+import com.example.musicstreamingapp.fragment.TrackMenuBottomSheet;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
@@ -62,7 +64,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             PlayerManager.getInstance().play(this, track, tracks, pos);
             startActivity(new Intent(this, PlayerActivity.class));
         });
-        adapter.setMoreListener((track, pos) -> vm.onRemoveTrack(track, pos));
+        adapter.setMoreListener((track, pos) -> showTrackMenu(track, pos));
         b.rvTracks.setAdapter(adapter);
 
         b.rvSuggestions.setLayoutManager(new LinearLayoutManager(this));
@@ -217,6 +219,47 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         if (currentPlaylist == null) return;
         PlaylistEditBottomSheet.newInstance(currentPlaylist)
             .show(getSupportFragmentManager(), "edit_playlist");
+    }
+
+    /** Mở menu 3 chấm cho 1 bài hát trong playlist (kèm tuỳ chọn "Xóa khỏi danh sách phát này"). */
+    private void showTrackMenu(Track track, int position) {
+        TrackMenuBottomSheet sheet = TrackMenuBottomSheet.newInstance(track, true);
+        sheet.setListener(new TrackMenuBottomSheet.Listener() {
+            @Override public void onLike(Track t) {
+                if (t.getTrackId() == null) return;
+                vm.likeTrack(t.getTrackId());
+                Snackbar.make(b.getRoot(), "Đã thêm vào Bài hát đã thích", Snackbar.LENGTH_SHORT).show();
+            }
+            @Override public void onAddToPlaylist(Track t) {
+                openAddToPlaylist(t);
+            }
+            @Override public void onGoToAlbum(Track t) {
+                if (t.getAlbum() == null || t.getAlbum().getAlbumId() == null) return;
+                Intent i = new Intent(PlaylistDetailActivity.this, AlbumDetailActivity.class);
+                i.putExtra("albumId", t.getAlbum().getAlbumId());
+                startActivity(i);
+            }
+            @Override public void onRemoveFromPlaylist(Track t) {
+                vm.onRemoveTrack(t, position);
+            }
+        });
+        sheet.show(getSupportFragmentManager(), "track_menu");
+    }
+
+    private void openAddToPlaylist(Track track) {
+        if (track.getTrackId() == null) return;
+        AddToPlaylistBottomSheet sheet = AddToPlaylistBottomSheet.newInstance(
+            track.getTrackId(), track.getTitle());
+        sheet.setCallback(new AddToPlaylistBottomSheet.Callback() {
+            @Override public void onSaved(long trackId, boolean isInAnyPlaylist) { /* no-op */ }
+            @Override public void onPlaylistCreated(Playlist playlist) {
+                Intent i = new Intent(PlaylistDetailActivity.this, PlaylistDetailActivity.class);
+                i.putExtra("playlistId", playlist.getPlaylistId());
+                i.putExtra("playlistName", playlist.getName());
+                startActivity(i);
+            }
+        });
+        sheet.show(getSupportFragmentManager(), "add_to_playlist");
     }
 
     private void hideShimmer() {

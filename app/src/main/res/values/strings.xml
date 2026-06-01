@@ -58,6 +58,16 @@
     <string name="premium_queue">Sắp xếp danh sách chờ nghe</string>
     <string name="premium_plans_title">Các gói có sẵn</string>
     <string name="plan_offer">Ưu đãi 2 tháng</string>
+    <string name="premium_current_plan">Đang dùng gói %1$s</string>
+    <string name="premium_current_expiry">Hết hạn %1$s</string>
+    <string name="premium_already_active">Bạn đang dùng Premium</string>
+    <string name="plan_name_individual">Cá nhân</string>
+    <string name="plan_name_student">Sinh viên</string>
+    <string name="plan_name_family">Gia đình</string>
+    <string name="premium_gate_title">Tính năng Premium</string>
+    <string name="premium_gate_desc">Nâng cấp để mở khóa %1$s</string>
+    <string name="premium_gate_upgrade">Nâng cấp ngay</string>
+    <string name="premium_gate_later">Để sau</string>
 
     <!-- Create -->
     <string name="create_playlist">Danh sách phát</string>

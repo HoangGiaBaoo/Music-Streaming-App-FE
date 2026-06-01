@@ -8,12 +8,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.musicstreamingapp.databinding.ActivitySettingsBinding;
+import com.example.musicstreamingapp.fragment.PremiumGateBottomSheet;
 import com.example.musicstreamingapp.model.UserMe;
 import com.example.musicstreamingapp.model.UserSettings;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.AccountStore;
+import com.example.musicstreamingapp.util.PremiumChecker;
 import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.SettingsViewModel;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -24,7 +27,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     private ActivitySettingsBinding b;
     private SettingsViewModel vm;
+    private SubscriptionViewModel subVm;
     private boolean bindingFromVm = false;
+    private boolean isPremium = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
         b.toolbar.setNavigationOnClickListener(v -> finish());
 
         vm = new ViewModelProvider(this, new VmFactory(this)).get(SettingsViewModel.class);
+        subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
 
         wireSwitches();
         b.rowQuality.setOnClickListener(v -> showQualityDialog());
@@ -43,6 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         observeViewModel();
         vm.loadIfNeeded();
+        subVm.loadCurrentSubscription();
     }
 
     private void wireSwitches() {
@@ -66,6 +73,7 @@ public class SettingsActivity extends AppCompatActivity {
         vm.errorEvent().observe(this, e -> e.consume(msg ->
             Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show()));
         vm.logoutDone().observe(this, e -> e.consume(done -> redirectToLogin()));
+        subVm.subscription().observe(this, sub -> isPremium = PremiumChecker.isPremium(sub));
     }
 
     private void renderUserMe(UserMe me) {
@@ -95,8 +103,15 @@ public class SettingsActivity extends AppCompatActivity {
         new AlertDialog.Builder(this, R.style.AlertDialogDark)
             .setTitle(R.string.settings_quality)
             .setSingleChoiceItems(QUALITIES, checked, (d, which) -> {
-                vm.onQualitySelected(QUALITIES[which]);
                 d.dismiss();
+                String q = QUALITIES[which];
+                boolean needsPremium = "HIGH".equals(q) || "VERY_HIGH".equals(q);
+                if (needsPremium && !isPremium) {
+                    PremiumGateBottomSheet.newInstance(getString(R.string.premium_quality))
+                        .show(getSupportFragmentManager(), "premium_gate");
+                } else {
+                    vm.onQualitySelected(q);
+                }
             })
             .show();
     }

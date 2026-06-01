@@ -21,6 +21,15 @@
             android:layout_height="0dp"
             android:layout_weight="1"/>
 
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            app:adSize="BANNER"
+            app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+            android:visibility="gone"/>
+
         <include
             android:id="@+id/mini_player"
             layout="@layout/layout_mini_player"

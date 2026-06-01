@@ -22,14 +22,19 @@ import com.example.musicstreamingapp.fragment.HomeFragment;
 import com.example.musicstreamingapp.fragment.LibraryFragment;
 import com.example.musicstreamingapp.fragment.PremiumFragment;
 import com.example.musicstreamingapp.fragment.SearchFragment;
+import com.example.musicstreamingapp.model.Subscription;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.model.UserMe;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.AccountStore;
+import com.example.musicstreamingapp.util.AdManager;
 import com.example.musicstreamingapp.util.PlayerManager;
+import com.example.musicstreamingapp.util.PremiumChecker;
 import com.example.musicstreamingapp.util.TokenManager;
 import com.example.musicstreamingapp.viewmodel.MainViewModel;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
+import com.google.android.gms.ads.AdRequest;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -37,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding b;
     private MainViewModel vm;
+    private SubscriptionViewModel subVm;
+
+    private boolean isPremium = false;
+    private boolean bannerLoaded = false;
 
     private CircleImageView drawerAvatar;
     private android.widget.TextView drawerDisplayName;
@@ -68,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         accountStore = new AccountStore(this);
         vm = new ViewModelProvider(this, new VmFactory(this)).get(MainViewModel.class);
+        subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
 
         setupBottomNav();
         setupMiniPlayer();
@@ -78,6 +88,9 @@ public class MainActivity extends AppCompatActivity {
         observeViewModel();
         vm.updateUsername(TokenManager.getUsername(this));
         vm.loadDrawerHeader();
+
+        AdManager.loadInterstitial(this);
+        subVm.loadCurrentSubscription();
     }
 
     private void setupBottomNav() {
@@ -162,6 +175,22 @@ public class MainActivity extends AppCompatActivity {
         vm.currentTrack().observe(this, this::renderMiniPlayer);
         vm.playing().observe(this, isPlaying -> b.miniPlayer.btnMiniPlay.setImageResource(
             Boolean.TRUE.equals(isPlaying) ? R.drawable.ic_pause : R.drawable.ic_play));
+        subVm.subscription().observe(this, this::renderAdsForSubscription);
+    }
+
+    /** Ẩn/hiện banner theo trạng thái Premium; chỉ load banner một lần cho user Free. */
+    private void renderAdsForSubscription(Subscription sub) {
+        isPremium = PremiumChecker.isPremium(sub);
+        AdManager.setPremium(isPremium);
+        if (isPremium) {
+            b.adBanner.setVisibility(View.GONE);
+        } else {
+            b.adBanner.setVisibility(View.VISIBLE);
+            if (!bannerLoaded) {
+                b.adBanner.loadAd(new AdRequest.Builder().build());
+                bannerLoaded = true;
+            }
+        }
     }
 
     private void renderDrawerHeader(UserMe me) {
@@ -248,6 +277,8 @@ public class MainActivity extends AppCompatActivity {
         vm.updateUsername(TokenManager.getUsername(this));
         vm.loadDrawerHeader();
         refreshAccountList();
+        subVm.loadCurrentSubscription();
+        b.adBanner.resume();
     }
 
     @Override
@@ -263,11 +294,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         progressHandler.removeCallbacks(progressTick);
+        b.adBanner.pause();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         progressHandler.removeCallbacks(progressTick);
+        b.adBanner.destroy();
     }
 }

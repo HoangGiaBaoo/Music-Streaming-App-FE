@@ -81,6 +81,39 @@
             android:textSize="15sp"/>
     </LinearLayout>
 
+    <!-- Nghe nhạc không quảng cáo → Premium (ẩn nếu đã Premium) -->
+    <LinearLayout
+        android:id="@+id/item_premium"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_no_ads"
+            android:tint="@color/accent_white"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="16dp"
+            android:text="Nghe nhạc không quảng cáo"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Premium"
+            android:textColor="@color/spotify_green"
+            android:textStyle="bold"
+            android:textSize="13sp"/>
+    </LinearLayout>
+
     <!-- Add to playlist -->
     <LinearLayout
         android:id="@+id/item_add_playlist"
@@ -106,6 +139,32 @@
             android:textSize="15sp"/>
     </LinearLayout>
 
+    <!-- Remove from this playlist (chỉ hiện khi mở từ trong playlist) -->
+    <LinearLayout
+        android:id="@+id/item_remove"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_delete"
+            android:tint="@color/accent_white"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Xóa khỏi danh sách phát này"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+    </LinearLayout>
+
     <!-- Go to album -->
     <LinearLayout
         android:id="@+id/item_go_album"
@@ -127,6 +186,31 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Chuyển đến album"
+            android:textColor="@color/accent_white"
+            android:textSize="15sp"/>
+    </LinearLayout>
+
+    <!-- Go to artist -->
+    <LinearLayout
+        android:id="@+id/item_go_artist"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_person"
+            android:tint="@color/accent_white"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Chuyển tới trang nghệ sĩ"
             android:textColor="@color/accent_white"
             android:textSize="15sp"/>
     </LinearLayout>

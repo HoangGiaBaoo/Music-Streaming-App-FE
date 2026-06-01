@@ -3,6 +3,7 @@ package com.example.musicstreamingapp.network;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.Genre;
+import com.example.musicstreamingapp.model.GenreFeedDto;
 import com.example.musicstreamingapp.model.HomeSection;
 import com.example.musicstreamingapp.model.JwtResponse;
 import com.example.musicstreamingapp.model.ListeningStats;
@@ -15,6 +16,7 @@ import com.example.musicstreamingapp.model.RecentItem;
 import com.example.musicstreamingapp.model.RegisterRequest;
 import com.example.musicstreamingapp.model.SearchResult;
 import com.example.musicstreamingapp.model.SubscribeRequest;
+import com.example.musicstreamingapp.model.SubscribeResponse;
 import com.example.musicstreamingapp.model.Subscription;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.model.UserMe;
@@ -107,6 +109,7 @@ public interface ApiService {
     // Genres
     @GET("api/genres") Call<List<Genre>> getGenres();
     @GET("api/genres/{id}/tracks") Call<List<Track>> getGenreTracks(@Path("id") Long id);
+    @GET("api/genres/{id}/feed") Call<GenreFeedDto> getGenreFeed(@Path("id") Long id);
 
     // Playlists
     @GET("api/playlists") Call<List<Playlist>> getMyPlaylists();
@@ -137,8 +140,11 @@ public interface ApiService {
     // Subscription
     @GET("api/subscriptions/me") Call<Subscription> getMySubscription();
     @GET("api/subscriptions/plans") Call<List<PlanInfo>> getPlans();
-    @POST("api/subscriptions/subscribe") Call<Subscription> subscribe(@Body SubscribeRequest body);
+    @POST("api/subscriptions/subscribe") Call<SubscribeResponse> subscribe(@Body SubscribeRequest body);
     @POST("api/subscriptions/cancel") Call<Map<String, String>> cancelSubscription();
+
+    // Payment (VNPay)
+    @POST("api/payment/create") Call<Map<String, String>> createPayment(@Body Map<String, Long> body);
 
     // Search
     @GET("api/search") Call<SearchResult> search(@Query("q") String query);

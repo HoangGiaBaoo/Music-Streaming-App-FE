@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".MusicApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,6 +16,11 @@
         android:theme="@style/Theme.MusicStreamingApp"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+
+        <!-- AdMob test Application ID (Google sample — không tính tiền thật) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
         <activity
             android:name=".SplashActivity"
@@ -45,6 +51,8 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".PremiumPlansActivity" android:exported="false"
             android:screenOrientation="portrait"/>
+        <activity android:name=".PaymentActivity" android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity android:name=".LyricsActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".SettingsActivity" android:exported="false"
@@ -60,6 +68,8 @@
         <activity android:name=".RecentActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".AddArtistActivity" android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".GenreDetailActivity" android:exported="false"
             android:screenOrientation="portrait"/>
     </application>
 

@@ -5,18 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="10dp"
+    android:paddingVertical="8dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <TextView
-        android:id="@+id/tv_number"
-        android:layout_width="28dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp"
-        android:gravity="center"
+    <ImageView
+        android:id="@+id/iv_cover"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/placeholder_gradient"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
@@ -33,7 +32,7 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@id/tv_artist"
         app:layout_constraintEnd_toStartOf="@id/tv_duration"
-        app:layout_constraintStart_toEndOf="@id/tv_number"
+        app:layout_constraintStart_toEndOf="@id/iv_cover"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"/>
 
@@ -49,7 +48,7 @@
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/tv_duration"
-        app:layout_constraintStart_toEndOf="@id/tv_number"
+        app:layout_constraintStart_toEndOf="@id/iv_cover"
         app:layout_constraintTop_toBottomOf="@id/tv_title"/>
 
     <TextView

@@ -74,6 +74,9 @@ dependencies {
     // Facebook Shimmer - loading skeleton placeholders
     implementation(libs.shimmer)
 
+    // Google AdMob (Free user banner + interstitial; test IDs)
+    implementation("com.google.android.gms:play-services-ads:23.0.0")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

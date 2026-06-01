@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.musicstreamingapp.GenreDetailActivity;
 import com.example.musicstreamingapp.MainActivity;
 import com.example.musicstreamingapp.PlayerActivity;
 import com.example.musicstreamingapp.R;
@@ -91,7 +92,13 @@ public class SearchFragment extends Fragment {
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(SearchViewModel.class);
         vm.trackResults().observe(getViewLifecycleOwner(), this::renderResults);
         vm.genres().observe(getViewLifecycleOwner(), genres -> {
-            b.rvBrowseAll.setAdapter(new GenreTileAdapter(genres, g -> {}));
+            b.rvBrowseAll.setAdapter(new GenreTileAdapter(genres, g -> {
+                Intent intent = new Intent(getContext(), GenreDetailActivity.class);
+                intent.putExtra(GenreDetailActivity.EXTRA_GENRE_ID,
+                    g.getGenreId() != null ? g.getGenreId() : -1L);
+                intent.putExtra(GenreDetailActivity.EXTRA_GENRE_NAME, g.getName());
+                startActivity(intent);
+            }));
             if (genres != null && !genres.isEmpty()) hideShimmer();
         });
         vm.showingResults().observe(getViewLifecycleOwner(), this::renderModeSwitch);

@@ -30,8 +30,10 @@ import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.LrcParser;
 import com.example.musicstreamingapp.util.LrcParser.LrcLine;
 import com.example.musicstreamingapp.util.PlayerManager;
+import com.example.musicstreamingapp.util.PremiumChecker;
 import com.example.musicstreamingapp.util.TimeUtil;
 import com.example.musicstreamingapp.viewmodel.PlayerViewModel;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 
 import java.util.ArrayList;
@@ -42,6 +44,10 @@ public class PlayerActivity extends AppCompatActivity {
 
     private ActivityPlayerBinding b;
     private PlayerViewModel vm;
+    private SubscriptionViewModel subVm;
+
+    private boolean isPremium = false;
+    private Track currentTrackRef;
 
     private List<LrcLine> lrcLines = Collections.emptyList();
     private final Handler lyricsHandler = new Handler(Looper.getMainLooper());
@@ -74,7 +80,9 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         vm = new ViewModelProvider(this, new VmFactory(this)).get(PlayerViewModel.class);
+        subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
         if (intentTrack != null) vm.recordPlay(intentTrack.getTrackId());
+        subVm.loadCurrentSubscription();
 
         wireControls();
         observeViewModel();
@@ -143,6 +151,17 @@ public class PlayerActivity extends AppCompatActivity {
         vm.following().observe(this, isFollowing -> b.btnFollowArtist.setText(
             Boolean.TRUE.equals(isFollowing) ? R.string.following_btn : R.string.follow));
         vm.progress().observe(this, this::renderProgress);
+        subVm.subscription().observe(this, sub -> {
+            isPremium = PremiumChecker.isPremium(sub);
+            updateHqBadge();
+        });
+    }
+
+    /** Badge "HQ" hiện khi user Premium đang phát file chất lượng cao (audioUrl chứa "/hq_"). */
+    private void updateHqBadge() {
+        Track t = currentTrackRef;
+        boolean isHqFile = t != null && t.getAudioUrl() != null && t.getAudioUrl().contains("/hq_");
+        b.tvBadgeHq.setVisibility(isPremium && isHqFile ? View.VISIBLE : View.GONE);
     }
 
     private void openLyrics() {
@@ -157,6 +176,8 @@ public class PlayerActivity extends AppCompatActivity {
 
     private void renderTrack(Track track) {
         if (track == null) return;
+        currentTrackRef = track;
+        updateHqBadge();
         b.tvTitle.setText(track.getTitle());
         b.tvArtist.setText(track.getArtistName());
         b.tvCreditArtist.setText(track.getArtistName());
