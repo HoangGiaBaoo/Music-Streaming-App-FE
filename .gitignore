@@ -23,6 +23,12 @@ ANDROID_CHUCNANG1.md
 ANDROID_INTEGRATION.md
 CLAUDE.md
 
+# Local-only docs (giữ trên máy, không đẩy lên git)
+PROJECT_OVERVIEW.md
+THUYET_TRINH_PROJECT.md
+SODO_MAN_HINH_VA_API.md
+LYRICS_SYNC_SPEC.md
+
 # UI reference screenshots (not part of the app)
 *.jpg
 *.jpeg
