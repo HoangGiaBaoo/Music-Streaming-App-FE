@@ -17,7 +17,7 @@ local.properties
 # Claude-specific & training/reference files (not needed to run the project)
 .claude/
 .giaodien_pages/
-docs/
+docs/*
 memory/
 ANDROID_CHUCNANG1.md
 ANDROID_INTEGRATION.md
@@ -33,3 +33,9 @@ LYRICS_SYNC_SPEC.md
 *.jpg
 *.jpeg
 /*.png
+
+# Ngoại lệ: cho phép commit ảnh screenshot dùng cho README
+!docs/screenshots/
+!docs/screenshots/*.png
+!docs/screenshots/*.jpg
+!docs/screenshots/*.jpeg
