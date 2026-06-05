@@ -20,6 +20,7 @@ import com.example.musicstreamingapp.PlayerActivity;
 import com.example.musicstreamingapp.PlaylistDetailActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.HomeFeedAdapter;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.databinding.FragmentHomeBinding;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
@@ -107,21 +108,15 @@ public class HomeFragment extends Fragment implements HomeFeedAdapter.OnHomeItem
     }
 
     @Override public void onArtist(Artist artist) {
-        Intent intent = new Intent(getContext(), ArtistDetailActivity.class);
-        intent.putExtra("artistId", artist.getArtistId());
-        startActivity(intent);
+        NavHelper.openArtist(requireContext(), artist.getArtistId());
     }
 
     @Override public void onAlbum(Album album) {
-        Intent intent = new Intent(getContext(), AlbumDetailActivity.class);
-        intent.putExtra("albumId", album.getAlbumId());
-        startActivity(intent);
+        NavHelper.openAlbum(requireContext(), album.getAlbumId());
     }
 
     @Override public void onPlaylist(Playlist playlist) {
-        Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
-        intent.putExtra("playlistId", playlist.getPlaylistId());
-        startActivity(intent);
+        NavHelper.openPlaylist(requireContext(), playlist.getPlaylistId(), playlist.getName());
     }
 
     @Override

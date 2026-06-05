@@ -9,6 +9,7 @@ import com.example.musicstreamingapp.data.RepoCallback;
 import com.example.musicstreamingapp.data.repository.LibraryRepository;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
+import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 
 import java.util.ArrayList;
@@ -90,6 +91,47 @@ public class ArtistDetailViewModel extends ViewModel {
                 updateVisibleTracks();
             }
             @Override public void onError(String message) { }
+        });
+
+        loadInPlaylistTrackIds();
+    }
+
+    /**
+     * Nạp tập trackId đang nằm trong BẤT KỲ playlist nào của user (cùng định nghĩa
+     * "Đã lưu vào" của AddToPlaylist) để dấu tích hiển thị đúng — và vẫn còn khi
+     * quay lại trang nghệ sĩ (trước đây chỉ cập nhật tạm trong phiên, vào lại là mất).
+     */
+    private void loadInPlaylistTrackIds() {
+        repo.getMyPlaylists(new RepoCallback<List<Playlist>>() {
+            @Override public void onSuccess(List<Playlist> playlists) {
+                if (playlists == null || playlists.isEmpty()) {
+                    inPlaylistTrackIds.postValue(new HashSet<>());
+                    return;
+                }
+                Set<Long> acc = new HashSet<>();
+                int[] remaining = {playlists.size()};
+                for (Playlist p : playlists) {
+                    Long pid = p.getPlaylistId();
+                    if (pid == null) {
+                        if (--remaining[0] == 0) inPlaylistTrackIds.postValue(new HashSet<>(acc));
+                        continue;
+                    }
+                    repo.getPlaylistTracks(pid, new RepoCallback<List<Track>>() {
+                        @Override public void onSuccess(List<Track> tracks) {
+                            if (tracks != null) {
+                                for (Track t : tracks) {
+                                    if (t.getTrackId() != null) acc.add(t.getTrackId());
+                                }
+                            }
+                            if (--remaining[0] == 0) inPlaylistTrackIds.postValue(new HashSet<>(acc));
+                        }
+                        @Override public void onError(String message) {
+                            if (--remaining[0] == 0) inPlaylistTrackIds.postValue(new HashSet<>(acc));
+                        }
+                    });
+                }
+            }
+            @Override public void onError(String message) { /* giữ tích rỗng nếu lỗi */ }
         });
     }
 

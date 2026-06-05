@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
-import com.example.musicstreamingapp.ArtistDetailActivity;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.PremiumPlansActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.data.RepoCallback;
@@ -131,9 +131,7 @@ public class TrackMenuBottomSheet extends BottomSheetDialogFragment {
         Artist artist = track.getArtist();
         if (artist != null && artist.getArtistId() != null) {
             goArtistItem.setOnClickListener(v -> {
-                Intent i = new Intent(requireContext(), ArtistDetailActivity.class);
-                i.putExtra("artistId", artist.getArtistId());
-                startActivity(i);
+                NavHelper.openArtist(requireContext(), artist.getArtistId());
                 dismiss();
             });
         } else {

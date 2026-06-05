@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.musicstreamingapp.AddArtistActivity;
-import com.example.musicstreamingapp.ArtistDetailActivity;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.adapter.ArtistListAdapter;
 import com.example.musicstreamingapp.databinding.FragmentFollowingArtistsBinding;
 import com.example.musicstreamingapp.model.Artist;
@@ -40,11 +40,8 @@ public class FollowingArtistsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         b.rvFollowing.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ArtistListAdapter(artists, artist -> {
-            Intent intent = new Intent(getContext(), ArtistDetailActivity.class);
-            intent.putExtra("artistId", artist.getArtistId());
-            startActivity(intent);
-        });
+        adapter = new ArtistListAdapter(artists, artist ->
+            NavHelper.openArtist(requireContext(), artist.getArtistId()));
         b.rvFollowing.setAdapter(adapter);
 
         vm = new ViewModelProvider(this, new VmFactory(requireContext()))

@@ -12,12 +12,33 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <ImageView
-        android:id="@+id/iv_cover"
+    <FrameLayout
         android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:scaleType="centerCrop"
-        android:background="#282828"/>
+        android:layout_height="56dp">
+
+        <!-- Cover playlist thường: ghép 2x2 từ track mẫu (giống Thư viện). -->
+        <com.example.musicstreamingapp.ui.PlaylistCoverView
+            android:id="@+id/cover_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- Cover riêng cho hàng "Bài hát đã thích": gradient tím + tim trắng. -->
+        <FrameLayout
+            android:id="@+id/liked_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_liked_gradient"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/liked_songs_title"
+                android:src="@drawable/ic_favorite_filled"
+                android:tint="#FFFFFF"/>
+        </FrameLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"

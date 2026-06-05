@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon ô vuông gradient tím + trái tim trắng ở giữa, dùng cho item ghim ở Thư viện. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#450AF5"
+                android:endColor="#C4EFD9"
+                android:type="linear"/>
+            <corners android:radius="4dp"/>
+        </shape>
+    </item>
+    <item
+        android:width="26dp"
+        android:height="26dp"
+        android:drawable="@drawable/ic_favorite_filled"
+        android:gravity="center"
+        android:tint="#FFFFFF"/>
+</layer-list>

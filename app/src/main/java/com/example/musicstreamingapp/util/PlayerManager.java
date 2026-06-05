@@ -21,6 +21,9 @@ public class PlayerManager {
     private Track currentTrack;
     private List<Track> queue = new ArrayList<>();
     private int currentIndex = 0;
+    /** Trộn bài. Mặc định BẬT (giống Spotify Free). Free bị ép luôn true. */
+    private boolean shuffleEnabled = true;
+    private final java.util.Random random = new java.util.Random();
     private OnTrackChangeListener listener;
     /** Listener PHỤ chỉ phục vụ đếm quảng cáo — không bị UI ghi đè, không ảnh hưởng phát nhạc. */
     private OnTrackChangeListener adListener;
@@ -91,29 +94,37 @@ public class PlayerManager {
 
     public void playNext() {
         if (queue.isEmpty()) return;
-        currentIndex = (currentIndex + 1) % queue.size();
-        Track next = queue.get(currentIndex);
-        currentTrack = next;
-        String url = RetrofitClient.BASE_MEDIA_URL + next.getAudioUrl();
-        player.setMediaItem(MediaItem.fromUri(Uri.parse(url)));
-        player.prepare();
-        player.play();
-        if (listener != null) listener.onTrackChanged(next);
-        if (adListener != null) adListener.onTrackChanged(next);
+        if (shuffleEnabled && queue.size() > 1) {
+            int next;
+            do { next = random.nextInt(queue.size()); } while (next == currentIndex);
+            currentIndex = next;
+        } else {
+            currentIndex = (currentIndex + 1) % queue.size();
+        }
+        playAtCurrentIndex();
     }
 
     public void playPrevious() {
         if (queue.isEmpty()) return;
         currentIndex = (currentIndex - 1 + queue.size()) % queue.size();
-        Track prev = queue.get(currentIndex);
-        currentTrack = prev;
-        String url = RetrofitClient.BASE_MEDIA_URL + prev.getAudioUrl();
+        playAtCurrentIndex();
+    }
+
+    /** Nạp và phát track tại {@link #currentIndex}, thông báo cho các listener. */
+    private void playAtCurrentIndex() {
+        Track track = queue.get(currentIndex);
+        currentTrack = track;
+        String url = RetrofitClient.BASE_MEDIA_URL + track.getAudioUrl();
         player.setMediaItem(MediaItem.fromUri(Uri.parse(url)));
         player.prepare();
         player.play();
-        if (listener != null) listener.onTrackChanged(prev);
-        if (adListener != null) adListener.onTrackChanged(prev);
+        if (listener != null) listener.onTrackChanged(track);
+        if (adListener != null) adListener.onTrackChanged(track);
     }
+
+    public boolean isShuffleEnabled() { return shuffleEnabled; }
+
+    public void setShuffleEnabled(boolean enabled) { this.shuffleEnabled = enabled; }
 
     public void togglePlayPause() {
         if (player == null) return;

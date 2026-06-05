@@ -5,6 +5,7 @@ import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.GenreFeedDto;
 import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.model.PlaylistReorderRequest;
 import com.example.musicstreamingapp.model.PlaylistRequest;
 import com.example.musicstreamingapp.model.RecentItem;
 import com.example.musicstreamingapp.model.Track;
@@ -40,6 +41,7 @@ public class LibraryRepository {
     public void getAllArtists(RepoCallback<List<Artist>> cb)             { enqueue(api.getArtists(), cb); }
     public void getFollowedArtists(RepoCallback<List<Artist>> cb)        { enqueue(api.getFollowedArtists(), cb); }
     public void getAllTracks(RepoCallback<List<Track>> cb)               { enqueue(api.getTracks(), cb); }
+    public void getDailyRecommendations(RepoCallback<List<Track>> cb)    { enqueue(api.getDailyRecommendations(), cb); }
 
     public void toggleFollow(long artistId, RepoCallback<Boolean> cb) {
         api.toggleFollow(artistId).enqueue(boolCb(cb));
@@ -104,10 +106,17 @@ public class LibraryRepository {
         api.removeTrackFromPlaylist(playlistId, trackId).enqueue(boolCb(cb));
     }
 
-    public void updatePlaylist(long playlistId, String name, Boolean isPublic, RepoCallback<Playlist> cb) {
+    /** Lưu thứ tự track mới cho playlist (danh sách trackId theo đúng thứ tự muốn lưu). */
+    public void reorderPlaylistTracks(long playlistId, List<Long> trackIds, RepoCallback<Boolean> cb) {
+        api.reorderPlaylistTracks(playlistId, new PlaylistReorderRequest(trackIds)).enqueue(boolCb(cb));
+    }
+
+    public void updatePlaylist(long playlistId, String name, Boolean isPublic, String description,
+                               RepoCallback<Playlist> cb) {
         PlaylistRequest req = new PlaylistRequest();
         req.name = name;
         req.isPublic = isPublic;
+        req.description = description;
         enqueue(api.updatePlaylist(playlistId, req), cb);
     }
 
@@ -171,10 +180,12 @@ public class LibraryRepository {
     private static Callback<Map<String, String>> boolCb(RepoCallback<Boolean> cb) {
         return new Callback<Map<String, String>>() {
             @Override public void onResponse(Call<Map<String, String>> c, Response<Map<String, String>> r) {
+                if (cb == null) return;   // caller chỉ "fire-and-forget" (vd: like ở màn nghệ sĩ)
                 if (r.isSuccessful()) cb.onSuccess(true);
                 else cb.onError("HTTP " + r.code());
             }
             @Override public void onFailure(Call<Map<String, String>> c, Throwable t) {
+                if (cb == null) return;
                 cb.onError(safeMessage(t));
             }
         };

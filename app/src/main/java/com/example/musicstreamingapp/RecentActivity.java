@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.musicstreamingapp.adapter.RecentSectionAdapter;
 import com.example.musicstreamingapp.databinding.ActivityRecentBinding;
+import com.example.musicstreamingapp.util.BottomNavHelper;
+import com.example.musicstreamingapp.util.MiniPlayerController;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.viewmodel.RecentViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -26,11 +28,16 @@ public class RecentActivity extends AppCompatActivity {
     private RecentSectionAdapter adapter;
     private RecentViewModel vm;
 
+    private MiniPlayerController miniPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         b = ActivityRecentBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
+
+        miniPlayer = new MiniPlayerController(this, b.miniPlayer);
+        BottomNavHelper.setup(this, b.bottomNav);
 
         setSupportActionBar(b.toolbar);
         b.toolbar.setNavigationOnClickListener(v -> finish());
@@ -48,6 +55,18 @@ public class RecentActivity extends AppCompatActivity {
         vm.errorEvent().observe(this, e -> e.consume(msg ->
             Snackbar.make(b.getRoot(), R.string.error_network, Snackbar.LENGTH_SHORT).show()));
         vm.loadIfNeeded();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        miniPlayer.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        miniPlayer.onPause();
     }
 
     private List<Object> toFlatList(List<RecentViewModel.DayGroup> groups) {

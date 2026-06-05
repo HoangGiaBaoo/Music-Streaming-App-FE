@@ -1,6 +1,7 @@
 package com.example.musicstreamingapp.fragment;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,8 +10,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStoreOwner;
 
-import com.example.musicstreamingapp.PlaylistDetailActivity;
+import com.example.musicstreamingapp.PlaylistCoverPickerActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.databinding.SheetPlaylistEditBinding;
 import com.example.musicstreamingapp.model.Playlist;
@@ -55,11 +57,15 @@ public class PlaylistEditBottomSheet extends BottomSheetDialogFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        vm = new ViewModelProvider(requireActivity(), new VmFactory(requireContext()))
+        // Chia sẻ ViewModel với host: nếu sheet được mở bởi PlaylistDetailFragment (qua
+        // childFragmentManager) thì scope theo fragment đó; nếu mở bởi Activity thì theo Activity.
+        ViewModelStoreOwner owner = getParentFragment() != null ? getParentFragment() : requireActivity();
+        vm = new ViewModelProvider(owner, new VmFactory(requireContext()))
             .get(PlaylistDetailViewModel.class);
 
         if (playlist != null) {
             b.etName.setText(playlist.getName() != null ? playlist.getName() : "");
+            b.etDescription.setText(playlist.getDescription() != null ? playlist.getDescription() : "");
             b.swPrivate.setChecked(Boolean.FALSE.equals(playlist.getPublic()));
             b.coverPreview.bind(playlist.getCoverUrl(), null);
         }
@@ -67,8 +73,11 @@ public class PlaylistEditBottomSheet extends BottomSheetDialogFragment {
         b.btnCancel.setOnClickListener(v -> dismiss());
 
         b.coverPreviewContainer.setOnClickListener(v -> {
-            if (getActivity() instanceof PlaylistDetailActivity) {
-                ((PlaylistDetailActivity) getActivity()).openCoverPicker();
+            // Mở cover picker trực tiếp (không phụ thuộc host là Activity hay Fragment).
+            if (playlist != null && playlist.getPlaylistId() != null) {
+                Intent i = new Intent(requireContext(), PlaylistCoverPickerActivity.class);
+                i.putExtra("playlistId", playlist.getPlaylistId());
+                startActivity(i);
             }
             dismiss();
         });
@@ -87,7 +96,8 @@ public class PlaylistEditBottomSheet extends BottomSheetDialogFragment {
             return;
         }
         boolean isPublic = !b.swPrivate.isChecked();
-        vm.updateDetails(newName, isPublic);
+        String description = b.etDescription.getText() == null ? "" : b.etDescription.getText().toString().trim();
+        vm.updateDetails(newName, isPublic, description);
         dismiss();
     }
 

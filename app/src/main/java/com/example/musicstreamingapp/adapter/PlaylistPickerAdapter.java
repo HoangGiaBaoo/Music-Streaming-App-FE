@@ -1,6 +1,5 @@
 package com.example.musicstreamingapp.adapter;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.R;
-import com.example.musicstreamingapp.model.Playlist;
-import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.ui.PlaylistCoverView;
 import com.example.musicstreamingapp.viewmodel.AddToPlaylistViewModel;
 
 import java.util.ArrayList;
@@ -26,7 +23,7 @@ public class PlaylistPickerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private static final int TYPE_SECTION = AddToPlaylistViewModel.ListItem.TYPE_SECTION;
     private static final int TYPE_PLAYLIST = AddToPlaylistViewModel.ListItem.TYPE_PLAYLIST;
 
-    public interface OnToggle { void onToggle(Playlist playlist); }
+    public interface OnToggle { void onToggle(long id); }
     public interface OnClearAll { void onClearAll(); }
 
     private List<AddToPlaylistViewModel.ListItem> items = new ArrayList<>();
@@ -83,8 +80,7 @@ public class PlaylistPickerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             }
         } else if (holder instanceof PlaylistVH) {
             PlaylistVH pvh = (PlaylistVH) holder;
-            Playlist p = item.playlist;
-            pvh.tvName.setText(p.getName() != null ? p.getName() : "");
+            pvh.tvName.setText(item.displayName());
 
             if (item.trackCount < 0) {
                 pvh.tvTrackCount.setVisibility(View.GONE);
@@ -93,33 +89,23 @@ public class PlaylistPickerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 pvh.tvTrackCount.setText(item.trackCount == 0 ? "Trống" : item.trackCount + " bài hát");
             }
 
-            boolean selected = selectedIds.contains(p.getPlaylistId());
+            boolean selected = selectedIds.contains(item.id);
             pvh.ivCheck.setImageResource(selected
                 ? R.drawable.ic_check_circle_green : R.drawable.ic_circle_outline);
 
-            if (p.getCoverUrl() != null && !p.getCoverUrl().isEmpty()) {
-                pvh.ivCover.clearColorFilter();
-                pvh.ivCover.setBackgroundColor(0xFF282828);
-                Glide.with(pvh.ivCover)
-                    .load(RetrofitClient.BASE_MEDIA_URL + p.getCoverUrl())
-                    .placeholder(R.drawable.placeholder_gradient)
-                    .centerCrop()
-                    .into(pvh.ivCover);
-            } else if (p.getCoverColor() != null) {
-                try {
-                    pvh.ivCover.setBackgroundColor(Color.parseColor(p.getCoverColor()));
-                } catch (Exception e) {
-                    pvh.ivCover.setBackgroundColor(0xFF282828);
-                }
-                pvh.ivCover.setImageResource(R.drawable.ic_music_note);
-                pvh.ivCover.setColorFilter(Color.argb(136, 255, 255, 255));
+            if (item.liked) {
+                // "Bài hát đã thích": cover gradient tím + trái tim trắng.
+                pvh.coverView.setVisibility(View.GONE);
+                pvh.likedCover.setVisibility(View.VISIBLE);
             } else {
-                pvh.ivCover.setBackgroundColor(0xFF282828);
-                pvh.ivCover.setImageResource(R.drawable.ic_music_note);
-                pvh.ivCover.setColorFilter(Color.argb(136, 255, 255, 255));
+                pvh.likedCover.setVisibility(View.GONE);
+                pvh.coverView.setVisibility(View.VISIBLE);
+                String coverUrl = item.playlist != null ? item.playlist.getCoverUrl() : null;
+                pvh.coverView.bind(coverUrl, item.sampleTracks);
             }
 
-            pvh.itemView.setOnClickListener(v -> { if (onToggle != null) onToggle.onToggle(p); });
+            final long id = item.id;
+            pvh.itemView.setOnClickListener(v -> { if (onToggle != null) onToggle.onToggle(id); });
         }
     }
 
@@ -133,11 +119,14 @@ public class PlaylistPickerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     static class PlaylistVH extends RecyclerView.ViewHolder {
-        ImageView ivCover, ivCheck;
+        PlaylistCoverView coverView;
+        View likedCover;
+        ImageView ivCheck;
         TextView tvName, tvTrackCount;
         PlaylistVH(@NonNull View v) {
             super(v);
-            ivCover = v.findViewById(R.id.iv_cover);
+            coverView = v.findViewById(R.id.cover_view);
+            likedCover = v.findViewById(R.id.liked_cover);
             ivCheck = v.findViewById(R.id.iv_check);
             tvName = v.findViewById(R.id.tv_name);
             tvTrackCount = v.findViewById(R.id.tv_track_count);

@@ -30,6 +30,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int TYPE_ALBUM = 2;
     public static final int TYPE_TRACK = 3;
     public static final int TYPE_ACTION = 4;
+    public static final int TYPE_LIKED_SONGS = 5;
 
     public static class Item {
         public int type;
@@ -60,6 +61,16 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             it.onClick = click;
             return it;
         }
+
+        /** Item ghim "Bài hát đã thích" (playlist ảo) ở đầu Thư viện. */
+        public static Item likedSongs(String title, String subtitle, Runnable click) {
+            Item it = new Item();
+            it.type = TYPE_LIKED_SONGS;
+            it.iconRes = R.drawable.ic_liked_songs_gradient;
+            it.title = title; it.subtitle = subtitle;
+            it.onClick = click;
+            return it;
+        }
     }
 
     private final List<Item> items;
@@ -79,6 +90,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         LayoutInflater inf = LayoutInflater.from(parent.getContext());
         if (viewType == TYPE_ARTIST) return new ArtistVH(inf.inflate(R.layout.item_library_artist, parent, false));
         if (viewType == TYPE_ACTION) return new ActionVH(inf.inflate(R.layout.item_library_action, parent, false));
+        if (viewType == TYPE_LIKED_SONGS) return new LikedSongsVH(inf.inflate(R.layout.item_library_liked, parent, false));
         return new RowVH(inf.inflate(R.layout.item_library_row, parent, false));
     }
 
@@ -86,6 +98,7 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         Item it = items.get(pos);
         if (h instanceof RowVH) bindRow((RowVH) h, it);
         else if (h instanceof ArtistVH) ((ArtistVH) h).bind(it);
+        else if (h instanceof LikedSongsVH) ((LikedSongsVH) h).bind(it);
         else ((ActionVH) h).bind(it);
         ItemAnim.animate(h.itemView, pos, lastPosition);
     }
@@ -167,6 +180,20 @@ public class LibraryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         void bind(Item it) {
             icon.setImageResource(it.iconRes);
             label.setText(it.title);
+            itemView.setOnClickListener(v -> { if (it.onClick != null) it.onClick.run(); });
+        }
+    }
+
+    static class LikedSongsVH extends RecyclerView.ViewHolder {
+        TextView title, subtitle;
+        LikedSongsVH(@NonNull View v) {
+            super(v);
+            title = v.findViewById(R.id.tv_liked_title);
+            subtitle = v.findViewById(R.id.tv_liked_subtitle);
+        }
+        void bind(Item it) {
+            title.setText(it.title);
+            subtitle.setText(it.subtitle);
             itemView.setOnClickListener(v -> { if (it.onClick != null) it.onClick.run(); });
         }
     }

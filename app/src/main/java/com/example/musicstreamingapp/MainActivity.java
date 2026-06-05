@@ -40,6 +40,9 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
+    /** Extra (int = id menu bottom_nav) để màn detail yêu cầu mở đúng tab khi quay về. */
+    public static final String EXTRA_TAB = "nav_tab";
+
     private ActivityMainBinding b;
     private MainViewModel vm;
     private SubscriptionViewModel subVm;
@@ -83,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
         setupMiniPlayer();
         setupDrawer();
 
-        if (savedInstanceState == null) loadFragment(new HomeFragment());
+        if (savedInstanceState == null && !handleTabIntent(getIntent())) {
+            loadFragment(new HomeFragment());
+        }
 
         observeViewModel();
         vm.updateUsername(TokenManager.getUsername(this));
@@ -93,6 +98,22 @@ public class MainActivity extends AppCompatActivity {
         subVm.loadCurrentSubscription();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleTabIntent(intent);
+    }
+
+    /** Chọn tab theo extra EXTRA_TAB nếu có. Trả về true nếu đã xử lý (đã chọn tab). */
+    private boolean handleTabIntent(Intent intent) {
+        if (intent == null) return false;
+        int tab = intent.getIntExtra(EXTRA_TAB, -1);
+        if (tab == -1) return false;
+        b.bottomNav.setSelectedItemId(tab);
+        return true;
+    }
+
     private void setupBottomNav() {
         b.bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -100,11 +121,21 @@ public class MainActivity extends AppCompatActivity {
                 new CreateBottomSheet().show(getSupportFragmentManager(), "create");
                 return false;
             }
+            // Đổi tab → gỡ hết màn chi tiết đang chồng (tránh fragment "mồ côi" do replace).
+            getSupportFragmentManager().popBackStackImmediate(
+                null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
             if (id == R.id.nav_home)         loadFragment(new HomeFragment());
             else if (id == R.id.nav_search)  loadFragment(new SearchFragment());
             else if (id == R.id.nav_library) loadFragment(new LibraryFragment());
             else if (id == R.id.nav_premium) loadFragment(new PremiumFragment());
             return true;
+        });
+        // Bấm lại tab đang chọn trong khi đang mở 1 màn chi tiết → gỡ chi tiết, về lại tab đó.
+        b.bottomNav.setOnItemReselectedListener(item -> {
+            if (item.getItemId() != R.id.nav_create) {
+                getSupportFragmentManager().popBackStackImmediate(
+                    null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            }
         });
     }
 
@@ -156,7 +187,8 @@ public class MainActivity extends AppCompatActivity {
         });
         root.findViewById(R.id.drawer_item_recent).setOnClickListener(v -> {
             b.drawerLayout.closeDrawer(GravityCompat.START);
-            startActivity(new Intent(this, RecentActivity.class));
+            // Mở "Đã nghe gần đây" dạng Fragment để bottom-nav đứng yên.
+            openDetail(new com.example.musicstreamingapp.fragment.RecentFragment());
         });
         root.findViewById(R.id.drawer_item_news).setOnClickListener(v -> {
             b.drawerLayout.closeDrawer(GravityCompat.START);
@@ -267,6 +299,31 @@ public class MainActivity extends AppCompatActivity {
                 R.anim.fade_in,    // popEnter
                 R.anim.fade_out)   // popExit
             .replace(R.id.fragment_container, fragment)
+            .commit();
+    }
+
+    /**
+     * Mở một màn chi tiết (Album/Nghệ sĩ/…) dạng Fragment vào cùng fragment_container, đẩy lên
+     * back-stack để nút Back quay lại tab trước. Thanh bottom-nav + mini-player ở MainActivity
+     * đứng yên, chỉ phần nội dung đổi (không dựng lại bar mỗi lần mở như khi dùng Activity riêng).
+     *
+     * Dùng hide(current) + add (KHÔNG replace) để view của tab hiện tại không bị huỷ — nhờ vậy
+     * khi bấm Back, tab cũ (vd Trang chủ) hiện lại nguyên trạng, không chạy lại shimmer/load.
+     */
+    public void openDetail(Fragment fragment) {
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+        androidx.fragment.app.FragmentTransaction t = getSupportFragmentManager().beginTransaction()
+            // Trượt ngang (translate) thay vì mờ dần (alpha): view lớn (CollapsingToolbar) khi
+            // alpha phải tạo offscreen buffer mỗi frame → giật; translate thì không → mượt hơn.
+            .setCustomAnimations(
+                R.anim.slide_in_right,  // enter: màn chi tiết vào từ phải
+                R.anim.slide_out_left,  // exit: màn cũ lùi nhẹ sang trái
+                R.anim.slide_in_left,   // popEnter: màn cũ trở lại khi Back
+                R.anim.slide_out_right) // popExit: màn chi tiết rời sang phải khi Back
+            .setReorderingAllowed(true);
+        if (current != null) t.hide(current);
+        t.add(R.id.fragment_container, fragment)
+            .addToBackStack(null)
             .commit();
     }
 

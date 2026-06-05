@@ -10,6 +10,7 @@ import com.example.musicstreamingapp.model.ListeningStats;
 import com.example.musicstreamingapp.model.LoginRequest;
 import com.example.musicstreamingapp.model.PlanInfo;
 import com.example.musicstreamingapp.model.Playlist;
+import com.example.musicstreamingapp.model.PlaylistReorderRequest;
 import com.example.musicstreamingapp.model.PlaylistRequest;
 import com.example.musicstreamingapp.model.ProfileUpdateRequest;
 import com.example.musicstreamingapp.model.RecentItem;
@@ -119,6 +120,7 @@ public interface ApiService {
     @GET("api/playlists/{id}/tracks") Call<List<Track>> getPlaylistTracks(@Path("id") Long id);
     @POST("api/playlists/{id}/tracks") Call<Map<String, String>> addTrackToPlaylist(@Path("id") Long id, @Query("trackId") Long trackId);
     @DELETE("api/playlists/{id}/tracks/{trackId}") Call<Map<String, String>> removeTrackFromPlaylist(@Path("id") Long id, @Path("trackId") Long trackId);
+    @PUT("api/playlists/{id}/tracks/order") Call<Map<String, String>> reorderPlaylistTracks(@Path("id") Long id, @Body PlaylistReorderRequest body);
     @PUT("api/playlists/{id}") Call<Playlist> updatePlaylist(@Path("id") Long id, @Body PlaylistRequest body);
     @DELETE("api/playlists/{id}") Call<Void> deletePlaylist(@Path("id") Long id);
     @Multipart @POST("api/playlists/{id}/cover")

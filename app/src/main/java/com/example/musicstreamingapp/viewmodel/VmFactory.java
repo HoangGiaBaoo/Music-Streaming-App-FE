@@ -58,6 +58,9 @@ public class VmFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(PlaylistDetailViewModel.class)) {
             return (T) new PlaylistDetailViewModel(new LibraryRepository(api));
         }
+        if (modelClass.isAssignableFrom(EditPlaylistViewModel.class)) {
+            return (T) new EditPlaylistViewModel(new LibraryRepository(api));
+        }
         if (modelClass.isAssignableFrom(RecentViewModel.class)) {
             return (T) new RecentViewModel(new LibraryRepository(api));
         }
@@ -96,6 +99,9 @@ public class VmFactory implements ViewModelProvider.Factory {
         }
         if (modelClass.isAssignableFrom(AddToPlaylistViewModel.class)) {
             return (T) new AddToPlaylistViewModel(new LibraryRepository(api));
+        }
+        if (modelClass.isAssignableFrom(AddTracksViewModel.class)) {
+            return (T) new AddTracksViewModel(new LibraryRepository(api));
         }
         throw new IllegalArgumentException("Unknown ViewModel: " + modelClass.getName());
     }

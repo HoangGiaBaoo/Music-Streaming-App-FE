@@ -69,6 +69,14 @@
     <string name="premium_gate_upgrade">Nâng cấp ngay</string>
     <string name="premium_gate_later">Để sau</string>
 
+    <!-- Gate trộn bài (Free chạm nút tắt trộn) -->
+    <string name="shuffle_gate_title">Bạn muốn nghe nhạc theo cách của mình?</string>
+    <string name="shuffle_gate_free_title">Nghe các bài hát tương tự</string>
+    <string name="shuffle_gate_free_sub">Có trong dịch vụ miễn phí của chúng tôi.</string>
+    <string name="shuffle_gate_premium_title">Tùy chỉnh hoàn toàn trải nghiệm nghe của bạn</string>
+    <string name="shuffle_gate_premium_sub">Phát nhạc theo thứ tự bất kỳ, trộn bài hoặc Trộn bài thông minh với gói Premium.</string>
+    <string name="shuffle_gate_cta">Khám phá Premium</string>
+
     <!-- Create -->
     <string name="create_playlist">Danh sách phát</string>
     <string name="create_playlist_desc">Tạo danh sách phát gồm các bài hát hoặc tập podcast</string>
@@ -134,6 +142,12 @@
     <string name="search_hint_old">Tìm kiếm bài hát, nghệ sĩ…</string>
     <string name="no_liked_songs">Bạn chưa thích bài hát nào</string>
     <string name="no_playlists">Bạn chưa có playlist nào</string>
+
+    <!-- Liked Songs (playlist ảo) -->
+    <string name="liked_songs_title">Bài hát đã thích</string>
+    <string name="liked_songs_subtitle">Danh sách phát • %1$d bài hát</string>
+    <string name="liked_songs_owner_subtitle">%1$s • %2$d bài hát</string>
+    <string name="liked_songs_empty">Các bài hát bạn thích sẽ xuất hiện ở đây</string>
     <string name="no_following">Bạn chưa theo dõi nghệ sĩ nào</string>
 
     <!-- Drawer -->
@@ -203,4 +217,29 @@
     <string name="profile_change_photo">Đổi ảnh</string>
     <string name="profile_avatar_uploaded">Đã tải ảnh lên</string>
     <string name="profile_avatar_failed">Tải ảnh thất bại</string>
+
+    <!-- Playlist action pills -->
+    <string name="playlist_action_add">Thêm</string>
+    <string name="playlist_action_edit">Chỉnh sửa</string>
+
+    <!-- Add tracks to playlist -->
+    <string name="add_tracks_title">Thêm vào danh sách phát</string>
+    <string name="add_tab_recommended">Bài hát đề xuất</string>
+    <string name="add_tab_recent">Mới phát gần đây</string>
+    <string name="add_tab_liked">Từ Bài hát đã thích</string>
+    <string name="add_recommended_header">Dựa trên các bản nhạc bạn vừa thêm vào</string>
+    <string name="add_tracks_search_hint">Bạn muốn thêm bài hát nào?</string>
+    <string name="add_track_added">Đã thêm vào danh sách phát</string>
+    <string name="add_tracks_empty">Không có bài hát nào</string>
+
+    <!-- Edit playlist (reorder/remove) -->
+    <string name="edit_playlist_title">Chỉnh sửa danh sách phát</string>
+    <string name="discard_changes_title">Hủy thay đổi?</string>
+    <string name="discard_changes_message">Nếu quay lại ngay bây giờ, thì bạn sẽ mất các thay đổi của mình.</string>
+    <string name="discard_changes_continue">Tiếp tục chỉnh sửa</string>
+    <string name="remove_from_playlist">Xoá khỏi danh sách phát</string>
+    <string name="drag_to_reorder">Kéo để sắp xếp</string>
+
+    <!-- Name & details -->
+    <string name="playlist_add_description">Thêm phần mô tả</string>
 </resources>

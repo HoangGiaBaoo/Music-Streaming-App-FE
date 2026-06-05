@@ -69,7 +69,7 @@ public class AddToPlaylistBottomSheet extends BottomSheetDialogFragment {
         long trackId = requireArguments().getLong(ARG_TRACK_ID);
 
         adapter = new PlaylistPickerAdapter(
-            playlist -> vm.togglePlaylist(playlist),
+            id -> vm.togglePlaylist(id),
             () -> vm.clearAllSaved()
         );
 

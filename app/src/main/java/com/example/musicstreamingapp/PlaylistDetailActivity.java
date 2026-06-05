@@ -21,13 +21,19 @@ import com.example.musicstreamingapp.adapter.SuggestedTrackAdapter;
 import com.example.musicstreamingapp.adapter.TrackDetailAdapter;
 import com.example.musicstreamingapp.databinding.ActivityPlaylistDetailBinding;
 import com.example.musicstreamingapp.fragment.AddToPlaylistBottomSheet;
+import com.example.musicstreamingapp.fragment.AddTracksBottomSheet;
 import com.example.musicstreamingapp.fragment.PlaylistEditBottomSheet;
+import com.example.musicstreamingapp.fragment.ShuffleGateBottomSheet;
 import com.example.musicstreamingapp.fragment.TrackMenuBottomSheet;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.BottomNavHelper;
+import com.example.musicstreamingapp.util.MiniPlayerController;
 import com.example.musicstreamingapp.util.PlayerManager;
+import com.example.musicstreamingapp.util.PremiumChecker;
 import com.example.musicstreamingapp.viewmodel.PlaylistDetailViewModel;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -43,6 +49,11 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     private TrackDetailAdapter adapter;
     private SuggestedTrackAdapter suggestionAdapter;
     private boolean shimmerHidden = false;
+    private long playlistId = -1;
+
+    private SubscriptionViewModel subVm;
+    private boolean isPremium = false;
+    private MiniPlayerController miniPlayer;
 
     @Nullable private Playlist currentPlaylist;
 
@@ -52,7 +63,10 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         b = ActivityPlaylistDetailBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
-        long playlistId = getIntent().getLongExtra("playlistId", -1);
+        miniPlayer = new MiniPlayerController(this, b.miniPlayer);
+        BottomNavHelper.setup(this, b.bottomNav);
+
+        playlistId = getIntent().getLongExtra("playlistId", -1);
         String name = getIntent().getStringExtra("playlistName");
 
         setSupportActionBar(b.toolbar);
@@ -72,22 +86,13 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             (track, pos) -> vm.addSuggestion(track));
         b.rvSuggestions.setAdapter(suggestionAdapter);
 
-        b.btnPlayFab.setOnClickListener(v -> {
-            if (!tracks.isEmpty()) {
-                PlayerManager.getInstance().play(this, tracks.get(0), tracks, 0);
-                startActivity(new Intent(this, PlayerActivity.class));
-            }
-        });
-        b.btnShuffle.setOnClickListener(v -> {
-            if (!tracks.isEmpty()) {
-                int pos = (int) (Math.random() * tracks.size());
-                PlayerManager.getInstance().play(this, tracks.get(pos), tracks, pos);
-                startActivity(new Intent(this, PlayerActivity.class));
-            }
-        });
+        b.btnPlayFab.setOnClickListener(v -> playFromStart());
+        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
 
         b.coverView.setOnClickListener(v -> openCoverPicker());
-        b.btnEditDetails.setOnClickListener(v -> openEditSheet());
+        b.btnAdd.setOnClickListener(v -> openAddTracks());
+        b.btnEdit.setOnClickListener(v -> openEditTracks());
+        b.btnDetails.setOnClickListener(v -> openEditSheet());
 
         b.shimmerPlaylist.getRoot().startShimmer();
         b.shimmerPlaylist.getRoot().postDelayed(this::hideShimmer, 4000);
@@ -96,6 +101,16 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         vm.setPlaylistId(playlistId);
         observeViewModel();
         vm.loadIfNeeded();
+
+        // Trạng thái Premium quyết định việc bật/tắt trộn bài (Free bị ép bật).
+        subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
+        subVm.subscription().observe(this, sub -> {
+            isPremium = PremiumChecker.isPremium(sub);
+            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
+            updateShuffleUi();
+        });
+        subVm.loadCurrentSubscription();
+        updateShuffleUi();
     }
 
     private void observeViewModel() {
@@ -138,8 +153,15 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        miniPlayer.onResume();
         // After returning from the cover picker, refresh to pick up new coverUrl.
         if (currentPlaylist != null) vm.reload();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        miniPlayer.onPause();
     }
 
     private void renderEmptyState() {
@@ -214,11 +236,53 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    /** Opens the name/privacy edit bottom sheet. Called from the "Thay đổi" button. */
+    /** Opens the name/privacy edit bottom sheet. Called from the "Tên và thông tin chi tiết" pill. */
     public void openEditSheet() {
         if (currentPlaylist == null) return;
         PlaylistEditBottomSheet.newInstance(currentPlaylist)
             .show(getSupportFragmentManager(), "edit_playlist");
+    }
+
+    /** Mở bottom sheet "Thêm vào danh sách phát" (nút Thêm); refresh playlist khi đóng. */
+    private void openAddTracks() {
+        if (playlistId < 0) return;
+        AddTracksBottomSheet sheet = AddTracksBottomSheet.newInstance(playlistId);
+        sheet.setCallback(() -> vm.reload());
+        sheet.show(getSupportFragmentManager(), "add_tracks");
+    }
+
+    /** Mở màn "Chỉnh sửa danh sách phát" (nút Chỉnh sửa). */
+    private void openEditTracks() {
+        if (playlistId < 0) return;
+        Intent i = new Intent(this, EditPlaylistActivity.class);
+        i.putExtra("playlistId", playlistId);
+        startActivity(i);
+    }
+
+    /** Nút Play: phát từ đầu (hoặc ngẫu nhiên nếu đang bật trộn bài). */
+    private void playFromStart() {
+        if (tracks.isEmpty()) return;
+        int start = PlayerManager.getInstance().isShuffleEnabled()
+            ? (int) (Math.random() * tracks.size()) : 0;
+        PlayerManager.getInstance().play(this, tracks.get(start), tracks, start);
+        startActivity(new Intent(this, PlayerActivity.class));
+    }
+
+    /** Free: chạm nút trộn → gate Premium (bị ép trộn bài). Premium: bật/tắt trộn bài thật. */
+    private void onShuffleClicked() {
+        if (!isPremium) {
+            new ShuffleGateBottomSheet().show(getSupportFragmentManager(), "shuffle_gate");
+            return;
+        }
+        PlayerManager pm = PlayerManager.getInstance();
+        pm.setShuffleEnabled(!pm.isShuffleEnabled());
+        updateShuffleUi();
+    }
+
+    /** Nút trộn xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
+    private void updateShuffleUi() {
+        boolean on = PlayerManager.getInstance().isShuffleEnabled();
+        b.btnShuffle.setColorFilter(getColor(on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     /** Mở menu 3 chấm cho 1 bài hát trong playlist (kèm tuỳ chọn "Xóa khỏi danh sách phát này"). */

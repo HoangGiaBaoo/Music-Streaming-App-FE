@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.example.musicstreamingapp.PlaylistDetailActivity;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.PlaylistAdapter;
 import com.example.musicstreamingapp.data.repository.LibraryRepository;
@@ -48,12 +48,8 @@ public class PlaylistsFragment extends Fragment {
         b.rvPlaylists.setLayoutManager(new LinearLayoutManager(getContext()));
         LibraryRepository repo = new LibraryRepository(
             RetrofitClient.getApiService(TokenManager.getPrefs(requireContext())));
-        adapter = new PlaylistAdapter(playlists, repo, playlist -> {
-            Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
-            intent.putExtra("playlistId", playlist.getPlaylistId());
-            intent.putExtra("playlistName", playlist.getName());
-            startActivity(intent);
-        });
+        adapter = new PlaylistAdapter(playlists, repo, playlist ->
+            NavHelper.openPlaylist(requireContext(), playlist.getPlaylistId(), playlist.getName()));
         b.rvPlaylists.setAdapter(adapter);
 
         b.fabAdd.setOnClickListener(v -> showCreateDialog());

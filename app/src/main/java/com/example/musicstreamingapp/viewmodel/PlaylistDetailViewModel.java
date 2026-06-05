@@ -71,9 +71,9 @@ public class PlaylistDetailViewModel extends ViewModel {
         });
     }
 
-    public void updateDetails(String name, Boolean isPublic) {
+    public void updateDetails(String name, Boolean isPublic, String description) {
         if (playlistId == null) return;
-        repo.updatePlaylist(playlistId, name, isPublic, new RepoCallback<Playlist>() {
+        repo.updatePlaylist(playlistId, name, isPublic, description, new RepoCallback<Playlist>() {
             @Override public void onSuccess(Playlist data) {
                 playlist.postValue(data);
                 editResult.postValue(new Event<>(EditResult.UPDATED));

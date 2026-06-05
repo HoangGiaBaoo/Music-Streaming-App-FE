@@ -29,4 +29,12 @@ public class LikedTracksViewModel extends ViewModel {
             @Override public void onError(String message) { /* keep stale */ }
         });
     }
+
+    /** Like/bỏ like 1 bài rồi reload danh sách. Dùng repo.toggleLike sẵn có — không đổi logic like. */
+    public void toggleLike(long trackId) {
+        repo.toggleLike(trackId, new RepoCallback<Boolean>() {
+            @Override public void onSuccess(Boolean nowLiked) { refresh(); }
+            @Override public void onError(String message) { /* giữ nguyên danh sách nếu lỗi */ }
+        });
+    }
 }

@@ -15,10 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.musicstreamingapp.AddArtistActivity;
 import com.example.musicstreamingapp.MainActivity;
-import com.example.musicstreamingapp.AlbumDetailActivity;
-import com.example.musicstreamingapp.ArtistDetailActivity;
 import com.example.musicstreamingapp.PlayerActivity;
-import com.example.musicstreamingapp.PlaylistDetailActivity;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.LibraryAdapter;
 import com.example.musicstreamingapp.data.repository.LibraryRepository;
@@ -85,6 +83,7 @@ public class LibraryFragment extends Fragment {
         vm.playlists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
         vm.artists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
         vm.liked().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
+        vm.likedCount().observe(getViewLifecycleOwner(), n -> renderCurrent());
     }
 
     private void hideShimmer() {
@@ -114,6 +113,7 @@ public class LibraryFragment extends Fragment {
         Chip c = vm.chip().getValue();
         if (c == null) return;
         items.clear();
+        if (c == Chip.ALL || c == Chip.PLAYLIST) addLikedSongsPinned();
         switch (c) {
             case ALL:
                 addPlaylists(vm.playlists().getValue());
@@ -134,6 +134,16 @@ public class LibraryFragment extends Fragment {
         }
         appendActions();
         adapter.notifyDataSetChanged();
+    }
+
+    /** Item ghim "Bài hát đã thích" (playlist ảo) — luôn ở đầu danh sách, mở LikedSongsActivity. */
+    private void addLikedSongsPinned() {
+        Integer count = vm.likedCount().getValue();
+        int n = count != null ? count : 0;
+        items.add(LibraryAdapter.Item.likedSongs(
+            getString(R.string.liked_songs_title),
+            getString(R.string.liked_songs_subtitle, n),
+            () -> NavHelper.openLiked(requireContext())));
     }
 
     private void addPlaylists(List<Playlist> data) {
@@ -178,16 +188,11 @@ public class LibraryFragment extends Fragment {
     }
 
     private void openArtist(Artist a) {
-        Intent intent = new Intent(getContext(), ArtistDetailActivity.class);
-        intent.putExtra("artistId", a.getArtistId());
-        startActivity(intent);
+        NavHelper.openArtist(requireContext(), a.getArtistId());
     }
 
     private void openPlaylist(Playlist p) {
-        Intent intent = new Intent(getContext(), PlaylistDetailActivity.class);
-        intent.putExtra("playlistId", p.getPlaylistId());
-        intent.putExtra("playlistName", p.getName());
-        startActivity(intent);
+        NavHelper.openPlaylist(requireContext(), p.getPlaylistId(), p.getName());
     }
 
     @Override

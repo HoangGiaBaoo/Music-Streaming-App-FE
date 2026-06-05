@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicstreamingapp.AlbumDetailActivity;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.ArtistDetailActivity;
 import com.example.musicstreamingapp.GenreDetailActivity;
 import com.example.musicstreamingapp.PlayerActivity;
@@ -131,24 +132,17 @@ public class GenreFeedAdapter extends RecyclerView.Adapter<GenreFeedAdapter.Sect
 
         private void openPlaylist(Context ctx, Playlist p) {
             if (p == null || p.getPlaylistId() == null) return;
-            Intent i = new Intent(ctx, PlaylistDetailActivity.class);
-            i.putExtra("playlistId", p.getPlaylistId());
-            i.putExtra("playlistName", p.getName());
-            ctx.startActivity(i);
+            NavHelper.openPlaylist(ctx, p.getPlaylistId(), p.getName());
         }
 
         private void openAlbum(Context ctx, Album a) {
             if (a == null || a.getAlbumId() == null) return;
-            Intent i = new Intent(ctx, AlbumDetailActivity.class);
-            i.putExtra("albumId", a.getAlbumId());
-            ctx.startActivity(i);
+            NavHelper.openAlbum(ctx, a.getAlbumId());
         }
 
         private void openArtist(Context ctx, Artist a) {
             if (a == null || a.getArtistId() == null) return;
-            Intent i = new Intent(ctx, ArtistDetailActivity.class);
-            i.putExtra("artistId", a.getArtistId());
-            ctx.startActivity(i);
+            NavHelper.openArtist(ctx, a.getArtistId());
         }
 
         private void openGenre(Context ctx, Genre g) {

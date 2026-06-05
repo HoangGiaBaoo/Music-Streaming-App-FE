@@ -3,6 +3,7 @@ package com.example.musicstreamingapp.model;
 public class PlaylistRequest {
     public String name;
     public Boolean isPublic;
+    public String description;
 
     public PlaylistRequest() {}
 

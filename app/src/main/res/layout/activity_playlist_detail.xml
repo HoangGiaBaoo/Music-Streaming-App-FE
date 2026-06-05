@@ -55,56 +55,120 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:paddingBottom="140dp">
 
-            <!-- Action row: Thay đổi (left) · shuffle + play FAB (right) -->
+            <!-- Action area: controls row (shuffle + play) then 3 pills -->
             <LinearLayout
                 android:id="@+id/row_actions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
+                android:orientation="vertical"
                 android:paddingTop="12dp"
                 android:paddingBottom="8dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_edit_details"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:minHeight="0dp"
-                    android:paddingHorizontal="14dp"
-                    android:text="@string/change"
-                    android:textColor="@color/accent_white"
-                    android:textSize="13sp"
-                    app:strokeColor="@color/divider"/>
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1"/>
-
-                <ImageButton
-                    android:id="@+id/btn_shuffle"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/shuffle"
-                    android:src="@drawable/ic_shuffle"
-                    android:tint="@color/spotify_green"/>
-
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                    android:id="@+id/btn_play_fab"
-                    android:layout_width="wrap_content"
+                <!-- Controls: shuffle + play FAB (right aligned) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:contentDescription="@string/play_all"
-                    android:src="@drawable/ic_play"
-                    app:backgroundTint="@color/spotify_green"
-                    app:elevation="6dp"
-                    app:fabSize="normal"
-                    app:tint="@color/accent_white"/>
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"/>
+
+                    <ImageButton
+                        android:id="@+id/btn_shuffle"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/shuffle"
+                        android:src="@drawable/ic_shuffle"
+                        android:tint="@color/spotify_green"/>
+
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/btn_play_fab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:contentDescription="@string/play_all"
+                        android:src="@drawable/ic_play"
+                        app:backgroundTint="@color/spotify_green"
+                        app:elevation="6dp"
+                        app:fabSize="normal"
+                        app:tint="@color/accent_white"/>
+                </LinearLayout>
+
+                <!-- Pills: Thêm · Chỉnh sửa · Tên và thông tin chi tiết -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:overScrollMode="never"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_add"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="14dp"
+                            android:text="@string/playlist_action_add"
+                            android:textColor="@color/accent_white"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_add"
+                            app:iconGravity="textStart"
+                            app:iconSize="18dp"
+                            app:iconTint="@color/accent_white"
+                            app:strokeColor="@color/divider"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_edit"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginStart="10dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="14dp"
+                            android:text="@string/playlist_action_edit"
+                            android:textColor="@color/accent_white"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_drag_handle"
+                            app:iconGravity="textStart"
+                            app:iconSize="18dp"
+                            app:iconTint="@color/accent_white"
+                            app:strokeColor="@color/divider"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_details"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="38dp"
+                            android:layout_marginStart="10dp"
+                            android:minHeight="0dp"
+                            android:paddingHorizontal="14dp"
+                            android:text="@string/playlist_name_and_details"
+                            android:textColor="@color/accent_white"
+                            android:textSize="13sp"
+                            app:icon="@drawable/ic_edit"
+                            app:iconGravity="textStart"
+                            app:iconSize="18dp"
+                            app:iconTint="@color/accent_white"
+                            app:strokeColor="@color/divider"/>
+                    </LinearLayout>
+                </HorizontalScrollView>
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -156,5 +220,31 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Đáy: mini-player (nổi khi đang phát) xếp trên thanh bottom-nav 5 icon -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/mini_player"
+            layout="@layout/layout_mini_player"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/mini_player_height"
+            android:visibility="gone"/>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/spotify_dark"
+            android:elevation="8dp"
+            app:itemIconTint="@color/bottom_nav_tint"
+            app:itemTextColor="@color/bottom_nav_tint"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_nav_menu"/>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

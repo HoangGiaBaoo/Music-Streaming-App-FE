@@ -23,16 +23,19 @@ public class LibraryViewModel extends ViewModel {
     private final MutableLiveData<List<Playlist>> playlists = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Artist>> artists = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Track>> liked = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<Integer> likedCount = new MutableLiveData<>(0);
 
     public LibraryViewModel(LibraryRepository repo) {
         this.repo = repo;
         loadFor(Chip.ALL);
+        loadLikedCount();
     }
 
     public LiveData<Chip> chip()                   { return chip; }
     public LiveData<List<Playlist>> playlists()    { return playlists; }
     public LiveData<List<Artist>> artists()        { return artists; }
     public LiveData<List<Track>> liked()           { return liked; }
+    public LiveData<Integer> likedCount()          { return likedCount; }
 
     public void onChipSelected(Chip newChip) {
         Chip current = chip.getValue();
@@ -44,6 +47,7 @@ public class LibraryViewModel extends ViewModel {
     public void refresh() {
         Chip current = chip.getValue();
         if (current != null) loadFor(current);
+        loadLikedCount();
     }
 
     private void loadFor(Chip c) {
@@ -84,6 +88,16 @@ public class LibraryViewModel extends ViewModel {
         repo.getFollowedArtists(new RepoCallback<List<Artist>>() {
             @Override public void onSuccess(List<Artist> data) { artists.postValue(data); }
             @Override public void onError(String message) { artists.postValue(Collections.emptyList()); }
+        });
+    }
+
+    /** Đếm số bài đã thích — load độc lập với chip để item ghim "Bài hát đã thích" luôn hiện đúng số. */
+    private void loadLikedCount() {
+        repo.getLikedTracks(new RepoCallback<List<Track>>() {
+            @Override public void onSuccess(List<Track> data) {
+                likedCount.postValue(data != null ? data.size() : 0);
+            }
+            @Override public void onError(String message) { /* giữ số cũ, tránh nháy về 0 khi lỗi mạng */ }
         });
     }
 }

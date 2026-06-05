@@ -47,6 +47,10 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".PlaylistDetailActivity" android:exported="false"
             android:screenOrientation="portrait"/>
+        <activity android:name=".EditPlaylistActivity" android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LikedSongsActivity" android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity android:name=".PlaylistCoverPickerActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".PremiumPlansActivity" android:exported="false"

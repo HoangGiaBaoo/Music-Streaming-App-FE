@@ -25,6 +25,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.musicstreamingapp.adapter.ExploreArtistAdapter;
 import com.example.musicstreamingapp.databinding.ActivityPlayerBinding;
+import com.example.musicstreamingapp.fragment.ShuffleGateBottomSheet;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.LrcParser;
@@ -131,7 +132,12 @@ public class PlayerActivity extends AppCompatActivity {
         b.btnBack.setOnClickListener(v -> closePlayer());
         b.btnPlayPause.setOnClickListener(v -> vm.onPlayPauseClicked());
         b.btnNext.setOnClickListener(v -> vm.onNextClicked());
-        b.btnPrev.setOnClickListener(v -> vm.onPrevClicked());
+        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnPrev.setOnClickListener(v -> {
+            // Free không được quay về bài trước (đang ép trộn bài)
+            if (!isPremium) return;
+            vm.onPrevClicked();
+        });
         b.btnLike.setOnClickListener(v -> vm.onLikeClicked());
         b.btnFollowArtist.setOnClickListener(v -> vm.onFollowArtistClicked());
         b.btnShowLyrics.setOnClickListener(v -> openLyrics());
@@ -153,8 +159,34 @@ public class PlayerActivity extends AppCompatActivity {
         vm.progress().observe(this, this::renderProgress);
         subVm.subscription().observe(this, sub -> {
             isPremium = PremiumChecker.isPremium(sub);
+            // Free luôn bị ép trộn bài
+            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
             updateHqBadge();
+            updateShuffleUi();
+            updatePrevUi();
         });
+    }
+
+    /** Free chạm nút trộn = cố tắt trộn → mở gate Premium. Premium thì bật/tắt thật. */
+    private void onShuffleClicked() {
+        if (!isPremium) {
+            new ShuffleGateBottomSheet().show(getSupportFragmentManager(), "shuffle_gate");
+            return;
+        }
+        boolean newState = !PlayerManager.getInstance().isShuffleEnabled();
+        PlayerManager.getInstance().setShuffleEnabled(newState);
+        updateShuffleUi();
+    }
+
+    /** Nút trộn xanh khi đang bật, xám khi tắt (chỉ Premium mới tắt được). */
+    private void updateShuffleUi() {
+        boolean on = PlayerManager.getInstance().isShuffleEnabled();
+        b.btnShuffle.setColorFilter(getColor(on ? R.color.spotify_green : R.color.text_secondary));
+    }
+
+    /** Free không quay lại bài trước được → làm mờ nút prev. */
+    private void updatePrevUi() {
+        b.btnPrev.setAlpha(isPremium ? 1f : 0.35f);
     }
 
     /** Badge "HQ" hiện khi user Premium đang phát file chất lượng cao (audioUrl chứa "/hq_"). */

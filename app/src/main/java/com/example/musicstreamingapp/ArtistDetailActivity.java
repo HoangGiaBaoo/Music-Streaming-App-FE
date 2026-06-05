@@ -14,13 +14,19 @@ import com.example.musicstreamingapp.adapter.ArtistAlbumAdapter;
 import com.example.musicstreamingapp.adapter.ArtistTrackAdapter;
 import com.example.musicstreamingapp.databinding.ActivityArtistDetailBinding;
 import com.example.musicstreamingapp.fragment.AddToPlaylistBottomSheet;
+import com.example.musicstreamingapp.fragment.ShuffleGateBottomSheet;
 import com.example.musicstreamingapp.fragment.TrackMenuBottomSheet;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.BottomNavHelper;
+import com.example.musicstreamingapp.util.MiniPlayerController;
+import com.example.musicstreamingapp.util.PlayerManager;
+import com.example.musicstreamingapp.util.PremiumChecker;
 import com.example.musicstreamingapp.viewmodel.ArtistDetailViewModel;
+import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -38,11 +44,19 @@ public class ArtistDetailActivity extends AppCompatActivity {
     private ArtistAlbumAdapter albumAdapter;
     private ArtistTrackAdapter trackAdapter;
 
+    private SubscriptionViewModel subVm;
+    private boolean isPremium = false;
+
+    private MiniPlayerController miniPlayer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         b = ActivityArtistDetailBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
+
+        miniPlayer = new MiniPlayerController(this, b.miniPlayer);
+        BottomNavHelper.setup(this, b.bottomNav);
 
         long artistId = getIntent().getLongExtra("artistId", -1);
 
@@ -70,8 +84,8 @@ public class ArtistDetailActivity extends AppCompatActivity {
 
         b.btnFollow.setOnClickListener(v -> vm.onFollowClicked());
         b.btnExpandTracks.setOnClickListener(v -> vm.toggleTracksExpanded());
-        b.btnPlay.setOnClickListener(v -> playFirst());
-        b.btnShuffle.setOnClickListener(v -> playShuffle());
+        b.btnPlay.setOnClickListener(v -> playRespectingShuffle());
+        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
 
         b.btnExpandBio.setOnClickListener(v -> {
             b.tvBio.setMaxLines(Integer.MAX_VALUE);
@@ -80,6 +94,16 @@ public class ArtistDetailActivity extends AppCompatActivity {
 
         observeViewModel();
         vm.loadIfNeeded();
+
+        // Premium mới bật/tắt trộn bài được; Free bị ép trộn (chạm shuffle để tắt → gate).
+        subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
+        subVm.subscription().observe(this, sub -> {
+            isPremium = PremiumChecker.isPremium(sub);
+            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
+            updateShuffleUi();
+        });
+        subVm.loadCurrentSubscription();
+        updateShuffleUi();
     }
 
     private void observeViewModel() {
@@ -194,16 +218,30 @@ public class ArtistDetailActivity extends AppCompatActivity {
         startActivity(i);
     }
 
-    private void playFirst() {
-        List<Track> all = vm.getAllTracks();
-        if (!all.isEmpty()) openPlayer(all.get(0));
-    }
-
-    private void playShuffle() {
+    /** Nút Play: phát theo trạng thái trộn bài hiện tại (ngẫu nhiên nếu đang bật). Không gate. */
+    private void playRespectingShuffle() {
         List<Track> all = vm.getAllTracks();
         if (all.isEmpty()) return;
-        int idx = (int) (Math.random() * all.size());
-        openPlayer(all.get(idx));
+        int start = PlayerManager.getInstance().isShuffleEnabled()
+            ? (int) (Math.random() * all.size()) : 0;
+        openPlayer(all.get(start));
+    }
+
+    /** Free: chạm shuffle (cố tắt) → gate Premium. Premium: bật/tắt trộn bài thật. */
+    private void onShuffleClicked() {
+        if (!isPremium) {
+            new ShuffleGateBottomSheet().show(getSupportFragmentManager(), "shuffle_gate");
+            return;
+        }
+        PlayerManager pm = PlayerManager.getInstance();
+        pm.setShuffleEnabled(!pm.isShuffleEnabled());
+        updateShuffleUi();
+    }
+
+    /** Nút trộn xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
+    private void updateShuffleUi() {
+        boolean on = PlayerManager.getInstance().isShuffleEnabled();
+        b.btnShuffle.setColorFilter(getColor(on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     private static String formatFollowers(Long count) {
@@ -215,6 +253,18 @@ public class ArtistDetailActivity extends AppCompatActivity {
             return String.format(Locale.US, "%.1f N người theo dõi", count / 1_000.0);
         }
         return count + " người theo dõi";
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        miniPlayer.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        miniPlayer.onPause();
     }
 
     @Override
