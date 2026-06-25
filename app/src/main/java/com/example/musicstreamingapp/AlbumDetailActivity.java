@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.bumptech.glide.Glide;
 import com.example.musicstreamingapp.adapter.TrackDetailAdapter;
 import com.example.musicstreamingapp.databinding.ActivityAlbumDetailBinding;
-import com.example.musicstreamingapp.fragment.ShuffleGateBottomSheet;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
@@ -20,6 +19,7 @@ import com.example.musicstreamingapp.util.BottomNavHelper;
 import com.example.musicstreamingapp.util.MiniPlayerController;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.PremiumChecker;
+import com.example.musicstreamingapp.util.ShuffleController;
 import com.example.musicstreamingapp.viewmodel.AlbumDetailViewModel;
 import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -37,7 +37,7 @@ public class AlbumDetailActivity extends AppCompatActivity {
     private boolean shimmerHidden = false;
 
     private SubscriptionViewModel subVm;
-    private boolean isPremium = false;
+    private ShuffleController shuffle;
 
     private MiniPlayerController miniPlayer;
 
@@ -63,7 +63,7 @@ public class AlbumDetailActivity extends AppCompatActivity {
         b.rvTracks.setAdapter(adapter);
 
         b.btnPlayAll.setOnClickListener(v -> playRespectingShuffle());
-        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnShuffle.setOnClickListener(v -> shuffle.onShuffleClicked());
 
         b.shimmerAlbum.getRoot().startShimmer();
         b.shimmerAlbum.getRoot().postDelayed(this::hideShimmer, 4000);
@@ -75,39 +75,18 @@ public class AlbumDetailActivity extends AppCompatActivity {
 
         // Premium mới bật/tắt trộn bài được; Free bị ép trộn (chạm shuffle để tắt → gate).
         subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
-        subVm.subscription().observe(this, sub -> {
-            isPremium = PremiumChecker.isPremium(sub);
-            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
-            updateShuffleUi();
-        });
+        shuffle = new ShuffleController(getSupportFragmentManager(), on ->
+            b.btnShuffle.setTextColor(getColor(on ? R.color.spotify_green : R.color.text_secondary)));
+        subVm.subscription().observe(this, sub -> shuffle.setPremium(PremiumChecker.isPremium(sub)));
         subVm.loadCurrentSubscription();
-        updateShuffleUi();
     }
 
     /** Nút "Phát tất cả": phát theo trạng thái trộn bài (ngẫu nhiên nếu đang bật). Không gate. */
     private void playRespectingShuffle() {
         if (tracks.isEmpty()) return;
-        int start = PlayerManager.getInstance().isShuffleEnabled()
-            ? (int) (Math.random() * tracks.size()) : 0;
+        int start = shuffle.startIndex(tracks.size());
         PlayerManager.getInstance().play(this, tracks.get(start), tracks, start);
         startActivity(new Intent(this, PlayerActivity.class));
-    }
-
-    /** Free: chạm shuffle (cố tắt) → gate Premium. Premium: bật/tắt trộn bài thật. */
-    private void onShuffleClicked() {
-        if (!isPremium) {
-            new ShuffleGateBottomSheet().show(getSupportFragmentManager(), "shuffle_gate");
-            return;
-        }
-        PlayerManager pm = PlayerManager.getInstance();
-        pm.setShuffleEnabled(!pm.isShuffleEnabled());
-        updateShuffleUi();
-    }
-
-    /** Nút "Shuffle" chữ xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
-    private void updateShuffleUi() {
-        boolean on = PlayerManager.getInstance().isShuffleEnabled();
-        b.btnShuffle.setTextColor(getColor(on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     private void observeViewModel() {

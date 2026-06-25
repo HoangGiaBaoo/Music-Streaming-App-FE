@@ -33,6 +33,34 @@ public class LibraryRepository {
 
     public void getAllAlbums(RepoCallback<List<Album>> cb)            { enqueue(api.getAlbums(), cb); }
     public void getAlbumTracks(long id, RepoCallback<List<Track>> cb) { enqueue(api.getAlbumTracks(id), cb); }
+    public void getSavedAlbums(RepoCallback<List<Album>> cb)          { enqueue(api.getSavedAlbums(), cb); }
+
+    /** Hỏi album có nằm trong Thư viện chưa. Lỗi mạng coi như chưa lưu. */
+    public void checkAlbumSaved(long albumId, RepoCallback<Boolean> cb) {
+        api.getAlbumSaved(albumId).enqueue(savedCb(cb));
+    }
+
+    /** Thêm/bỏ album khỏi Thư viện; trả về trạng thái mới (true = đang lưu). */
+    public void toggleSaveAlbum(long albumId, RepoCallback<Boolean> cb) {
+        api.toggleSaveAlbum(albumId).enqueue(savedCb(cb));
+    }
+
+    /** Đọc khoá "saved" trong response {saved: bool}. */
+    private static Callback<Map<String, Boolean>> savedCb(RepoCallback<Boolean> cb) {
+        return new Callback<Map<String, Boolean>>() {
+            @Override public void onResponse(Call<Map<String, Boolean>> c, Response<Map<String, Boolean>> r) {
+                if (cb == null) return;
+                if (r.isSuccessful() && r.body() != null) {
+                    cb.onSuccess(Boolean.TRUE.equals(r.body().get("saved")));
+                } else {
+                    cb.onError("HTTP " + r.code());
+                }
+            }
+            @Override public void onFailure(Call<Map<String, Boolean>> c, Throwable t) {
+                if (cb != null) cb.onError(safeMessage(t));
+            }
+        };
+    }
 
     // ---- Artists -------------------------------------------------------
 

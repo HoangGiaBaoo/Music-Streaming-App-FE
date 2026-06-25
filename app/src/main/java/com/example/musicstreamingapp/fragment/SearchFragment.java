@@ -14,13 +14,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.musicstreamingapp.GenreDetailActivity;
 import com.example.musicstreamingapp.MainActivity;
 import com.example.musicstreamingapp.PlayerActivity;
 import com.example.musicstreamingapp.R;
-import com.example.musicstreamingapp.adapter.ExploreCardAdapter;
 import com.example.musicstreamingapp.adapter.GenreTileAdapter;
 import com.example.musicstreamingapp.adapter.HomeTrackRowAdapter;
 import com.example.musicstreamingapp.databinding.FragmentSearchBinding;
@@ -30,7 +28,6 @@ import com.example.musicstreamingapp.viewmodel.SearchViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SearchFragment extends Fragment {
@@ -66,15 +63,6 @@ public class SearchFragment extends Fragment {
         b.rvResults.setLayoutManager(new LinearLayoutManager(getContext()));
         resultsAdapter = new HomeTrackRowAdapter(trackResults, this::openPlayer);
         b.rvResults.setAdapter(resultsAdapter);
-
-        b.rvExplore.setLayoutManager(new LinearLayoutManager(getContext(),
-            RecyclerView.HORIZONTAL, false));
-        b.rvExplore.setAdapter(new ExploreCardAdapter(Arrays.asList(
-            new ExploreCardAdapter.Item("#pop đương đại", R.color.placeholder_start),
-            new ExploreCardAdapter.Item("#downtown vibes", R.color.placeholder_end),
-            new ExploreCardAdapter.Item("#athleisure", R.color.spotify_green),
-            new ExploreCardAdapter.Item("#chill night", R.color.bg_secondary)
-        )));
 
         b.rvBrowseAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
 

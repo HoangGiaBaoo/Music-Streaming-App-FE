@@ -20,6 +20,7 @@ public class AlbumDetailViewModel extends ViewModel {
     private final MutableLiveData<Album> album = new MutableLiveData<>();
     private final MutableLiveData<List<Track>> tracks = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Event<String>> errorEvent = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> saved = new MutableLiveData<>(false);
 
     private Long albumId;
     private boolean loaded = false;
@@ -32,13 +33,32 @@ public class AlbumDetailViewModel extends ViewModel {
     public LiveData<List<Track>> tracks() { return tracks; }
     public LiveData<Event<String>> errorEvent() { return errorEvent; }
 
+    /** true = album đang nằm trong Thư viện (nút hiện dấu tích). */
+    public LiveData<Boolean> saved() { return saved; }
+
     public void setAlbumId(long id) {
         this.albumId = id;
+    }
+
+    /** Thêm/bỏ album khỏi Thư viện; cập nhật trạng thái nút khi server trả về. */
+    public void toggleSaved() {
+        if (albumId == null) return;
+        repo.toggleSaveAlbum(albumId, new RepoCallback<Boolean>() {
+            @Override public void onSuccess(Boolean isSaved) { saved.postValue(isSaved); }
+            @Override public void onError(String message) {
+                errorEvent.postValue(new Event<>(message));
+            }
+        });
     }
 
     public void loadIfNeeded() {
         if (loaded || albumId == null) return;
         loaded = true;
+
+        repo.checkAlbumSaved(albumId, new RepoCallback<Boolean>() {
+            @Override public void onSuccess(Boolean isSaved) { saved.postValue(isSaved); }
+            @Override public void onError(String message) { /* mặc định chưa lưu */ }
+        });
 
         repo.getAllAlbums(new RepoCallback<List<Album>>() {
             @Override public void onSuccess(List<Album> data) {

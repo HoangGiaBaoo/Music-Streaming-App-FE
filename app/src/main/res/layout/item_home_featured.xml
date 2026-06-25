@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,14 +11,19 @@
     android:orientation="horizontal"
     android:padding="10dp">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/iv_featured_cover"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:background="@color/spotify_elevated"
-        android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.Spotify.Rounded4"/>
+        app:cardBackgroundColor="@color/spotify_elevated"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <com.example.musicstreamingapp.ui.PlaylistCoverView
+            android:id="@+id/iv_featured_cover"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/tv_featured_title"

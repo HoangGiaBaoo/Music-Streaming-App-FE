@@ -25,8 +25,8 @@ import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.NavHelper;
-import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.PremiumChecker;
+import com.example.musicstreamingapp.util.ShuffleController;
 import com.example.musicstreamingapp.viewmodel.ArtistDetailViewModel;
 import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -58,7 +58,7 @@ public class ArtistDetailFragment extends BaseDetailFragment {
     private ArtistTrackAdapter trackAdapter;
 
     private SubscriptionViewModel subVm;
-    private boolean isPremium = false;
+    private ShuffleController shuffle;
 
     @Nullable
     @Override
@@ -95,7 +95,7 @@ public class ArtistDetailFragment extends BaseDetailFragment {
         b.btnFollow.setOnClickListener(v -> vm.onFollowClicked());
         b.btnExpandTracks.setOnClickListener(v -> vm.toggleTracksExpanded());
         b.btnPlay.setOnClickListener(v -> playRespectingShuffle());
-        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnShuffle.setOnClickListener(v -> shuffle.onShuffleClicked());
 
         b.btnExpandBio.setOnClickListener(v -> {
             b.tvBio.setMaxLines(Integer.MAX_VALUE);
@@ -104,7 +104,9 @@ public class ArtistDetailFragment extends BaseDetailFragment {
 
         // ViewModel tạo nhẹ (chưa gọi mạng); subVm dành cho phần hoãn bên dưới.
         subVm = new ViewModelProvider(this, new VmFactory(requireContext())).get(SubscriptionViewModel.class);
-        updateShuffleUi();
+        shuffle = new ShuffleController(getChildFragmentManager(), on ->
+            b.btnShuffle.setColorFilter(ContextCompat.getColor(requireContext(),
+                on ? R.color.spotify_green : R.color.text_secondary)));
 
         scheduleDeferredSetup();
     }
@@ -116,11 +118,8 @@ public class ArtistDetailFragment extends BaseDetailFragment {
         vm.loadIfNeeded();
 
         // Premium mới bật/tắt trộn bài được; Free bị ép trộn (chạm shuffle để tắt → gate).
-        subVm.subscription().observe(getViewLifecycleOwner(), sub -> {
-            isPremium = PremiumChecker.isPremium(sub);
-            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
-            updateShuffleUi();
-        });
+        subVm.subscription().observe(getViewLifecycleOwner(), sub ->
+            shuffle.setPremium(PremiumChecker.isPremium(sub)));
         subVm.loadCurrentSubscription();
     }
 
@@ -235,27 +234,8 @@ public class ArtistDetailFragment extends BaseDetailFragment {
     private void playRespectingShuffle() {
         List<Track> all = vm.getAllTracks();
         if (all.isEmpty()) return;
-        int start = PlayerManager.getInstance().isShuffleEnabled()
-            ? (int) (Math.random() * all.size()) : 0;
+        int start = shuffle.startIndex(all.size());
         openPlayer(all.get(start));
-    }
-
-    /** Free: chạm shuffle (cố tắt) → gate Premium. Premium: bật/tắt trộn bài thật. */
-    private void onShuffleClicked() {
-        if (!isPremium) {
-            new ShuffleGateBottomSheet().show(getChildFragmentManager(), "shuffle_gate");
-            return;
-        }
-        PlayerManager pm = PlayerManager.getInstance();
-        pm.setShuffleEnabled(!pm.isShuffleEnabled());
-        updateShuffleUi();
-    }
-
-    /** Nút trộn xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
-    private void updateShuffleUi() {
-        boolean on = PlayerManager.getInstance().isShuffleEnabled();
-        b.btnShuffle.setColorFilter(ContextCompat.getColor(requireContext(),
-            on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     private static String formatFollowers(Long count) {

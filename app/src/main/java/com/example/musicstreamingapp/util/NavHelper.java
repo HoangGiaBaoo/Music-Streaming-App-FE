@@ -7,21 +7,18 @@ import android.content.Intent;
 
 import com.example.musicstreamingapp.AlbumDetailActivity;
 import com.example.musicstreamingapp.ArtistDetailActivity;
-import com.example.musicstreamingapp.LikedSongsActivity;
 import com.example.musicstreamingapp.MainActivity;
 import com.example.musicstreamingapp.PlaylistDetailActivity;
-import com.example.musicstreamingapp.RecentActivity;
 import com.example.musicstreamingapp.fragment.AlbumDetailFragment;
 import com.example.musicstreamingapp.fragment.ArtistDetailFragment;
 import com.example.musicstreamingapp.fragment.LikedSongsFragment;
 import com.example.musicstreamingapp.fragment.PlaylistDetailFragment;
-import com.example.musicstreamingapp.fragment.RecentFragment;
 
 /**
  * Router mở các màn chi tiết. Nếu ngữ cảnh nằm trong {@link MainActivity} → mở dạng Fragment
- * (thanh bottom-nav + mini-player đứng yên, không dựng lại). Nếu được gọi từ một Activity riêng
- * (Profile, AddArtist…) → fallback mở Activity cũ như trước. Nhờ vậy mọi call site dùng chung
- * một API, không cần biết mình đang ở đâu.
+ * (thanh bottom-nav + mini-player đứng yên, không dựng lại). Album/Nghệ sĩ/Playlist khi được gọi
+ * từ một Activity riêng (Profile, AddArtist, GenreDetail…) → fallback mở Activity cũ.
+ * Màn "Đã thích" / "Gần đây" chỉ mở từ trong Main nên chỉ có đường Fragment.
  */
 public final class NavHelper {
 
@@ -74,17 +71,7 @@ public final class NavHelper {
         MainActivity main = asMain(ctx);
         if (main != null) {
             main.openDetail(new LikedSongsFragment());
-        } else {
-            ctx.startActivity(new Intent(ctx, LikedSongsActivity.class));
         }
-    }
-
-    public static void openRecent(Context ctx) {
-        MainActivity main = asMain(ctx);
-        if (main != null) {
-            main.openDetail(new RecentFragment());
-        } else {
-            ctx.startActivity(new Intent(ctx, RecentActivity.class));
-        }
+        // Màn "Đã thích" chỉ được mở từ trong MainActivity (tab Thư viện) → không có fallback Activity.
     }
 }

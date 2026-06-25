@@ -23,7 +23,6 @@ import com.example.musicstreamingapp.databinding.ActivityPlaylistDetailBinding;
 import com.example.musicstreamingapp.fragment.AddToPlaylistBottomSheet;
 import com.example.musicstreamingapp.fragment.AddTracksBottomSheet;
 import com.example.musicstreamingapp.fragment.PlaylistEditBottomSheet;
-import com.example.musicstreamingapp.fragment.ShuffleGateBottomSheet;
 import com.example.musicstreamingapp.fragment.TrackMenuBottomSheet;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
@@ -32,6 +31,7 @@ import com.example.musicstreamingapp.util.BottomNavHelper;
 import com.example.musicstreamingapp.util.MiniPlayerController;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.PremiumChecker;
+import com.example.musicstreamingapp.util.ShuffleController;
 import com.example.musicstreamingapp.viewmodel.PlaylistDetailViewModel;
 import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -52,7 +52,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     private long playlistId = -1;
 
     private SubscriptionViewModel subVm;
-    private boolean isPremium = false;
+    private ShuffleController shuffle;
     private MiniPlayerController miniPlayer;
 
     @Nullable private Playlist currentPlaylist;
@@ -87,7 +87,7 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         b.rvSuggestions.setAdapter(suggestionAdapter);
 
         b.btnPlayFab.setOnClickListener(v -> playFromStart());
-        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnShuffle.setOnClickListener(v -> shuffle.onShuffleClicked());
 
         b.coverView.setOnClickListener(v -> openCoverPicker());
         b.btnAdd.setOnClickListener(v -> openAddTracks());
@@ -104,13 +104,10 @@ public class PlaylistDetailActivity extends AppCompatActivity {
 
         // Trạng thái Premium quyết định việc bật/tắt trộn bài (Free bị ép bật).
         subVm = new ViewModelProvider(this, new VmFactory(this)).get(SubscriptionViewModel.class);
-        subVm.subscription().observe(this, sub -> {
-            isPremium = PremiumChecker.isPremium(sub);
-            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
-            updateShuffleUi();
-        });
+        shuffle = new ShuffleController(getSupportFragmentManager(), on ->
+            b.btnShuffle.setColorFilter(getColor(on ? R.color.spotify_green : R.color.text_secondary)));
+        subVm.subscription().observe(this, sub -> shuffle.setPremium(PremiumChecker.isPremium(sub)));
         subVm.loadCurrentSubscription();
-        updateShuffleUi();
     }
 
     private void observeViewModel() {
@@ -262,27 +259,9 @@ public class PlaylistDetailActivity extends AppCompatActivity {
     /** Nút Play: phát từ đầu (hoặc ngẫu nhiên nếu đang bật trộn bài). */
     private void playFromStart() {
         if (tracks.isEmpty()) return;
-        int start = PlayerManager.getInstance().isShuffleEnabled()
-            ? (int) (Math.random() * tracks.size()) : 0;
+        int start = shuffle.startIndex(tracks.size());
         PlayerManager.getInstance().play(this, tracks.get(start), tracks, start);
         startActivity(new Intent(this, PlayerActivity.class));
-    }
-
-    /** Free: chạm nút trộn → gate Premium (bị ép trộn bài). Premium: bật/tắt trộn bài thật. */
-    private void onShuffleClicked() {
-        if (!isPremium) {
-            new ShuffleGateBottomSheet().show(getSupportFragmentManager(), "shuffle_gate");
-            return;
-        }
-        PlayerManager pm = PlayerManager.getInstance();
-        pm.setShuffleEnabled(!pm.isShuffleEnabled());
-        updateShuffleUi();
-    }
-
-    /** Nút trộn xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
-    private void updateShuffleUi() {
-        boolean on = PlayerManager.getInstance().isShuffleEnabled();
-        b.btnShuffle.setColorFilter(getColor(on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     /** Mở menu 3 chấm cho 1 bài hát trong playlist (kèm tuỳ chọn "Xóa khỏi danh sách phát này"). */

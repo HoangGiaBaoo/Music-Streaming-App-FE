@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,6 +33,7 @@ import com.example.musicstreamingapp.network.RetrofitClient;
 import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.PremiumChecker;
+import com.example.musicstreamingapp.util.ShuffleController;
 import com.example.musicstreamingapp.viewmodel.PlaylistDetailViewModel;
 import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -65,7 +67,7 @@ public class PlaylistDetailFragment extends BaseDetailFragment {
     private long playlistId = -1;
 
     private SubscriptionViewModel subVm;
-    private boolean isPremium = false;
+    private ShuffleController shuffle;
 
     @Nullable private Playlist currentPlaylist;
 
@@ -100,18 +102,23 @@ public class PlaylistDetailFragment extends BaseDetailFragment {
         b.rvSuggestions.setAdapter(suggestionAdapter);
 
         b.btnPlayFab.setOnClickListener(v -> playFromStart());
-        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnShuffle.setOnClickListener(v -> shuffle.onShuffleClicked());
 
         b.coverView.setOnClickListener(v -> openCoverPicker());
         b.btnAdd.setOnClickListener(v -> openAddTracks());
         b.btnEdit.setOnClickListener(v -> openEditTracks());
         b.btnDetails.setOnClickListener(v -> openEditSheet());
 
+        b.btnDownload.setOnClickListener(v -> showDownloadGate());
+        b.btnMore.setOnClickListener(v -> showPlaylistMenu());
+
         // ViewModel tạo nhẹ (chưa gọi mạng) để listener/onResume dùng được ngay.
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(PlaylistDetailViewModel.class);
         vm.setPlaylistId(playlistId);
         subVm = new ViewModelProvider(this, new VmFactory(requireContext())).get(SubscriptionViewModel.class);
-        updateShuffleUi();
+        shuffle = new ShuffleController(getChildFragmentManager(), on ->
+            b.btnShuffle.setColorFilter(ContextCompat.getColor(requireContext(),
+                on ? R.color.spotify_green : R.color.text_secondary)));
 
         scheduleDeferredSetup();
     }
@@ -126,11 +133,8 @@ public class PlaylistDetailFragment extends BaseDetailFragment {
         vm.loadIfNeeded();
 
         // Trạng thái Premium quyết định việc bật/tắt trộn bài (Free bị ép bật).
-        subVm.subscription().observe(getViewLifecycleOwner(), sub -> {
-            isPremium = PremiumChecker.isPremium(sub);
-            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
-            updateShuffleUi();
-        });
+        subVm.subscription().observe(getViewLifecycleOwner(), sub ->
+            shuffle.setPremium(PremiumChecker.isPremium(sub)));
         subVm.loadCurrentSubscription();
     }
 
@@ -270,31 +274,46 @@ public class PlaylistDetailFragment extends BaseDetailFragment {
         startActivity(i);
     }
 
+    /** Tải về luôn mở gate Premium (bản học tập chưa tải file thật). */
+    private void showDownloadGate() {
+        String name = currentPlaylist != null && currentPlaylist.getName() != null
+            ? currentPlaylist.getName() : "";
+        String cover = currentPlaylist != null ? currentPlaylist.getCoverUrl() : null;
+        DownloadGateBottomSheet.newInstance(name, cover).show(getChildFragmentManager(), "download_gate");
+    }
+
+    /** Menu 3 chấm của playlist (chỉ các chức năng đã làm được). */
+    private void showPlaylistMenu() {
+        if (currentPlaylist == null) return;
+        PlaylistMenuBottomSheet sheet = PlaylistMenuBottomSheet.newInstance(
+            currentPlaylist.getName(), currentPlaylist.getCoverUrl());
+        sheet.setListener(new PlaylistMenuBottomSheet.Listener() {
+            @Override public void onDownload() { showDownloadGate(); }
+            @Override public void onAddTracks() { openAddTracks(); }
+            @Override public void onEditTracks() { openEditTracks(); }
+            @Override public void onEditDetails() { openEditSheet(); }
+            @Override public void onCreateCover() { openCoverPicker(); }
+            @Override public void onDelete() { confirmDeletePlaylist(); }
+        });
+        sheet.show(getChildFragmentManager(), "playlist_menu");
+    }
+
+    /** Hỏi xác nhận trước khi xóa playlist (thao tác không hoàn tác). */
+    private void confirmDeletePlaylist() {
+        new AlertDialog.Builder(requireContext())
+            .setTitle(R.string.delete_playlist_confirm_title)
+            .setMessage(R.string.delete_playlist_confirm_msg)
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.delete, (d, w) -> vm.deletePlaylist())
+            .show();
+    }
+
     /** Nút Play: phát từ đầu (hoặc ngẫu nhiên nếu đang bật trộn bài). */
     private void playFromStart() {
         if (tracks.isEmpty()) return;
-        int start = PlayerManager.getInstance().isShuffleEnabled()
-            ? (int) (Math.random() * tracks.size()) : 0;
+        int start = shuffle.startIndex(tracks.size());
         PlayerManager.getInstance().play(requireContext(), tracks.get(start), tracks, start);
         startActivity(new Intent(requireContext(), PlayerActivity.class));
-    }
-
-    /** Free: chạm nút trộn → gate Premium (bị ép trộn bài). Premium: bật/tắt trộn bài thật. */
-    private void onShuffleClicked() {
-        if (!isPremium) {
-            new ShuffleGateBottomSheet().show(getChildFragmentManager(), "shuffle_gate");
-            return;
-        }
-        PlayerManager pm = PlayerManager.getInstance();
-        pm.setShuffleEnabled(!pm.isShuffleEnabled());
-        updateShuffleUi();
-    }
-
-    /** Nút trộn xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
-    private void updateShuffleUi() {
-        boolean on = PlayerManager.getInstance().isShuffleEnabled();
-        b.btnShuffle.setColorFilter(ContextCompat.getColor(requireContext(),
-            on ? R.color.spotify_green : R.color.text_secondary));
     }
 
     /** Mở menu 3 chấm cho 1 bài trong playlist (kèm "Xóa khỏi danh sách phát này"). */

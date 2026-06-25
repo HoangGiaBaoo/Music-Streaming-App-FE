@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Admin</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f13;
+    --bg2: #16181f;
+    --bg3: #1e2029;
+    --border: #2a2d38;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --accent: #7c6af7;
+    --accent2: #5f4de0;
+    --green: #2dd4a0;
+    --red: #f05c5c;
+    --amber: #f5a623;
+    --font-mono: 'Space Mono', monospace;
+    --font-sans: 'DM Sans', sans-serif;
+    --radius: 10px;
+    --sidebar: 220px;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── Layout ── */
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: var(--sidebar);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-nav { padding: 12px 10px; flex: 1; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .15s;
+    user-select: none;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: #7c6af720; color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 18px; text-align: center; }
+
+  .sidebar-user {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-avatar {
+    width: 32px; height: 32px;
+    background: var(--accent2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: #fff;
+    font-family: var(--font-mono);
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-role { font-size: 11px; color: var(--accent); font-family: var(--font-mono); }
+  .logout-btn {
+    background: none; border: none; color: var(--muted);
+    cursor: pointer; font-size: 16px; padding: 2px;
+    transition: color .15s;
+  }
+  .logout-btn:hover { color: var(--red); }
+
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+
+  .topbar {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-size: 18px; font-weight: 600; flex: 1; }
+  .topbar-sub { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+
+  .content { padding: 24px 28px; }
+
+  /* ── Login ── */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .login-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    width: 340px;
+  }
+  .login-title {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .login-sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+
+  /* ── Form elements ── */
+  .field { margin-bottom: 14px; }
+  .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  input[type=text], input[type=password], input[type=date], input[type=number],
+  select, textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select option { background: var(--bg3); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .file-input-wrap {
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+    font-size: 12px; color: var(--muted);
+  }
+  .file-input-wrap:hover { border-color: var(--accent); background: #7c6af710; }
+  .file-input-wrap input { display: none; }
+  .file-name { color: var(--green); font-family: var(--font-mono); font-size: 11px; margin-top: 4px; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { opacity: .5; cursor: default; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg3); color: var(--text); }
+  .btn-danger { background: #f05c5c20; color: var(--red); border: 1px solid #f05c5c40; }
+  .btn-danger:hover { background: #f05c5c30; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; padding: 10px 14px;
+    font-size: 11px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: .06em; font-family: var(--font-mono);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg2); }
+  .td-mono { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .td-actions { display: flex; gap: 6px; }
+
+  /* ── Chips / badges ── */
+  .chip {
+    display: inline-block;
+    padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 500; font-family: var(--font-mono);
+    background: var(--bg3); color: var(--muted);
+  }
+  .chip-accent { background: #7c6af720; color: var(--accent); }
+  .chip-green { background: #2dd4a020; color: var(--green); }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-size: 14px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* ── Modal ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: #00000090;
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    width: 100%; max-width: 480px;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-head {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--bg2); z-index: 1;
+  }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    background: none; border: none; color: var(--muted);
+    font-size: 18px; cursor: pointer; padding: 2px 6px;
+    border-radius: 4px; transition: all .15s;
+  }
+  .modal-close:hover { background: var(--bg3); color: var(--text); }
+  .modal-body { padding: 20px; }
+  .modal-foot {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  /* ── Multi-select genres ── */
+  .genre-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px; margin-top: 4px;
+  }
+  .genre-chip {
+    padding: 5px 8px; border-radius: 6px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--muted);
+    transition: all .12s; text-align: center;
+    user-select: none;
+  }
+  .genre-chip.selected { background: #7c6af730; border-color: var(--accent); color: var(--accent); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 16px;
+    font-size: 13px; z-index: 999;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 24px #00000060;
+    animation: slideUp .2s ease;
+    max-width: 320px;
+  }
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); }
+  .toast-icon { font-size: 16px; }
+  @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } }
+
+  /* ── Misc ── */
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+  .avatar-img {
+    width: 36px; height: 36px; border-radius: 50%;
+    object-fit: cover; background: var(--bg3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .row { display: flex; gap: 12px; }
+  .col { flex: 1; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .err { color: var(--red); font-size: 12px; margin-top: 6px; font-family: var(--font-mono); }
+  .loading { text-align: center; padding: 40px; color: var(--muted); font-family: var(--font-mono); font-size: 12px; }
+
+  /* ── Track manager (playlist) ── */
+  .tk-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 8px; margin-bottom: 6px; background: var(--bg3);
+  }
+  .tk-pos { font-family: var(--font-mono); font-size: 11px; color: var(--muted); width: 20px; text-align: right; }
+  .tk-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tk-artist { color: var(--muted); font-size: 12px; }
+  .tk-btn {
+    background: var(--bg2); border: 1px solid var(--border); color: var(--muted);
+    width: 26px; height: 26px; border-radius: 6px; cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center; transition: all .12s;
+  }
+  .tk-btn:hover { color: var(--text); border-color: var(--accent); }
+  .tk-btn:disabled { opacity: .3; cursor: default; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ─── Config ───────────────────────────────────────────────────────
+const BASE = 'http://localhost:8080/musicapp';
+
+// ─── API helper ───────────────────────────────────────────────────
+function api(path, opts = {}) {
+  const token = localStorage.getItem('token');
+  const headers = { ...(opts.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (opts.json) {
+    headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(opts.json);
+    delete opts.json;
+  }
+  return fetch(BASE + path, { ...opts, headers })
+    .then(r => {
+      // 204 No Content — DELETE thành công, không có body
+      if (r.status === 204) return { ok: true, status: 204, data: {} };
+      return r.json().catch(() => ({})).then(d => ({ ok: r.ok, status: r.status, data: d }));
+    });
+}
+
+// ─── Toast ────────────────────────────────────────────────────────
+function Toast({ msg, type, onDone }) {
+  useEffect(() => { const t = setTimeout(onDone, 3000); return () => clearTimeout(t); }, []);
+  return (
+    <div className={`toast ${type}`}>
+      <span className="toast-icon">{type === 'success' ? '✓' : '✗'}</span>
+      {msg}
+    </div>
+  );
+}
+
+// ─── File input ───────────────────────────────────────────────────
+function FileInput({ label, accept, onChange, value }) {
+  const ref = useRef();
+  return (
+    <div className="field">
+      <label className="label">{label}</label>
+      <div className="file-input-wrap" onClick={() => ref.current.click()}>
+        <input ref={ref} type="file" accept={accept} onChange={e => onChange(e.target.files[0])} />
+        {value ? <div className="file-name">📎 {value.name}</div> : <div>Chọn file {accept}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Genre multi-select ───────────────────────────────────────────
+function GenreSelect({ genres, selected, onChange }) {
+  const toggle = id => {
+    if (selected.includes(id)) onChange(selected.filter(x => x !== id));
+    else onChange([...selected, id]);
+  };
+  return (
+    <div className="field">
+      <label className="label">Thể loại</label>
+      <div className="genre-grid">
+        {genres.map(g => (
+          <div key={g.genreId}
+            className={`genre-chip ${selected.includes(g.genreId) ? 'selected' : ''}`}
+            onClick={() => toggle(g.genreId)}>
+            {g.name}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Confirm delete modal ─────────────────────────────────────────
+function ConfirmModal({ title, msg, onConfirm, onCancel }) {
+  return (
+    <div className="overlay" onClick={onCancel}>
+      <div className="modal" style={{maxWidth: 360}} onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <span className="modal-title">⚠ {title}</span>
+          <button className="modal-close" onClick={onCancel}>✕</button>
+        </div>
+        <div className="modal-body" style={{color: 'var(--muted)'}}>{msg}</div>
+        <div className="modal-foot">
+          <button className="btn btn-ghost" onClick={onCancel}>Huỷ</button>
+          <button className="btn btn-danger" onClick={onConfirm}>Xoá</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// LOGIN PAGE
+// ═══════════════════════════════════════════════════════════════════
+function LoginPage({ onLogin }) {
+  const [form, setForm] = useState({ username: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
+  const submit = async () => {
+    setLoading(true); setErr('');
+    const { ok, data } = await api('/api/auth/login', {
+      method: 'POST', json: form
+    });
+    setLoading(false);
+    if (!ok) { setErr(data.error || 'Đăng nhập thất bại'); return; }
+    if (data.role !== 'admin') { setErr('Tài khoản không có quyền admin'); return; }
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('username', data.username);
+    onLogin(data);
+  };
+
+  return (
+    <div className="login-wrap">
+      <div className="login-card">
+        <div className="login-title">MUSIC ADMIN</div>
+        <div className="login-sub">Đăng nhập để quản lý nội dung</div>
+        <div className="field">
+          <label className="label">Username</label>
+          <input type="text" value={form.username}
+            onChange={e => setForm({...form, username: e.target.value})}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+            placeholder="admin" />
+        </div>
+        <div className="field">
+          <label className="label">Password</label>
+          <input type="password" value={form.password}
+            onChange={e => setForm({...form, password: e.target.value})}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+            placeholder="••••••••" />
+        </div>
+        {err && <div className="err">{err}</div>}
+        <button className="btn btn-primary btn-full mt-16"
+          onClick={submit} disabled={loading}>
+          {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ARTISTS PAGE
+// ═══════════════════════════════════════════════════════════════════
+function ArtistsPage({ toast }) {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null); // null | 'add' | {id, ...}
+  const [confirm, setConfirm] = useState(null);
+  const [form, setForm] = useState({ name: '', bio: '' });
+  const [file, setFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await api('/api/artists');
+    setList(Array.isArray(data) ? data : (data.content || []));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => { setForm({ name: '', bio: '' }); setFile(null); setModal('add'); };
+  const openEdit = a => { setForm({ name: a.name, bio: a.bio || '' }); setFile(null); setModal(a); };
+
+  const save = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const fd = new FormData();
+    fd.append('name', form.name);
+    if (form.bio) fd.append('bio', form.bio);
+    if (file) fd.append('avatar', file);
+
+    const isEdit = modal !== 'add';
+    const { ok, data } = await api(
+      isEdit ? `/api/admin/artists/${modal.artistId}` : '/api/admin/artists',
+      { method: isEdit ? 'PUT' : 'POST', body: fd }
+    );
+    setSaving(false);
+    if (!ok) { toast(data.error || 'Lỗi lưu', 'error'); return; }
+    toast(isEdit ? 'Đã cập nhật nghệ sĩ' : 'Đã thêm nghệ sĩ', 'success');
+    setModal(null); load();
+  };
+
+  const del = async id => {
+    const { ok, status, data } = await api(`/api/admin/artists/${id}`, { method: 'DELETE' });
+    if (!ok) {
+      const msg = status === 409 ? 'Không thể xoá — nghệ sĩ còn album hoặc bài hát liên kết' : (data.error || 'Không thể xoá');
+      toast(msg, 'error');
+    } else { toast('Đã xoá nghệ sĩ', 'success'); load(); }
+    setConfirm(null);
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Nghệ sĩ <span className="chip">{list.length}</span></span>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ Thêm nghệ sĩ</button>
+        </div>
+        <div className="table-wrap">
+          {loading ? <div className="loading">Đang tải...</div> :
+          list.length === 0 ? <div className="empty"><div className="empty-icon">🎤</div>Chưa có nghệ sĩ nào</div> :
+          <table>
+            <thead><tr>
+              <th>#</th><th>Ảnh</th><th>Tên</th><th>Bio</th><th></th>
+            </tr></thead>
+            <tbody>
+              {list.map((a, i) => (
+                <tr key={a.artistId}>
+                  <td className="td-mono">{a.artistId}</td>
+                  <td>
+                    {a.avatarUrl
+                      ? <img src={BASE + a.avatarUrl} className="avatar-img" alt="" onError={e => e.target.style.display='none'} />
+                      : <div className="avatar-img">{a.name?.[0]}</div>}
+                  </td>
+                  <td style={{fontWeight: 500}}>{a.name}</td>
+                  <td style={{maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--muted)'}}>{a.bio || '—'}</td>
+                  <td>
+                    <div className="td-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>Sửa</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(a)}>Xoá</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="overlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">{modal === 'add' ? 'Thêm nghệ sĩ' : 'Sửa nghệ sĩ'}</span>
+              <button className="modal-close" onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="field">
+                <label className="label">Tên nghệ sĩ *</label>
+                <input type="text" value={form.name} onChange={e => setForm({...form, name: e.target.value})} placeholder="Sơn Tùng M-TP" />
+              </div>
+              <div className="field">
+                <label className="label">Tiểu sử</label>
+                <textarea value={form.bio} onChange={e => setForm({...form, bio: e.target.value})} placeholder="Ca sĩ kiêm nhạc sĩ..." />
+              </div>
+              <FileInput label="Ảnh đại diện (.jpg/.png)" accept=".jpg,.jpeg,.png" value={file} onChange={setFile} />
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Huỷ</button>
+              <button className="btn btn-primary" onClick={save} disabled={saving || !form.name.trim()}>
+                {saving ? 'Đang lưu...' : 'Lưu'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title="Xoá nghệ sĩ"
+          msg={`Xoá "${confirm.name}"? Hành động này không thể hoàn tác. Chỉ xoá được nếu nghệ sĩ không còn album/track liên kết.`}
+          onConfirm={() => del(confirm.artistId)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ALBUMS PAGE
+// ═══════════════════════════════════════════════════════════════════
+function AlbumsPage({ toast }) {
+  const [list, setList] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+  const [form, setForm] = useState({ artistId: '', title: '', albumType: 'ALBUM', releaseDate: '', description: '' });
+  const [file, setFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [a, al] = await Promise.all([api('/api/artists'), api('/api/albums')]);
+    setArtists(Array.isArray(a.data) ? a.data : (a.data.content || []));
+    setList(Array.isArray(al.data) ? al.data : (al.data.content || []));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setForm({ artistId: '', title: '', albumType: 'ALBUM', releaseDate: '', description: '' });
+    setFile(null); setModal('add');
+  };
+  const openEdit = a => {
+    setForm({
+      artistId: a.artist?.artistId || '',
+      title: a.title, albumType: a.albumType || 'ALBUM',
+      releaseDate: a.releaseDate || '', description: a.description || ''
+    });
+    setFile(null); setModal(a);
+  };
+
+  const save = async () => {
+    if (!form.title.trim() || !form.artistId) return;
+    setSaving(true);
+    const fd = new FormData();
+    fd.append('title', form.title);
+    fd.append('artistId', form.artistId);
+    fd.append('albumType', form.albumType);
+    if (form.releaseDate) fd.append('releaseDate', form.releaseDate);
+    if (form.description) fd.append('description', form.description);
+    if (file) fd.append('cover', file);
+
+    const isEdit = modal !== 'add';
+    const { ok, data } = await api(
+      isEdit ? `/api/admin/albums/${modal.albumId}` : '/api/admin/albums',
+      { method: isEdit ? 'PUT' : 'POST', body: fd }
+    );
+    setSaving(false);
+    if (!ok) { toast(data.error || 'Lỗi lưu', 'error'); return; }
+    toast(isEdit ? 'Đã cập nhật album' : 'Đã thêm album', 'success');
+    setModal(null); load();
+  };
+
+  const del = async id => {
+    const { ok, status, data } = await api(`/api/admin/albums/${id}`, { method: 'DELETE' });
+    if (!ok) {
+      const msg = status === 409 ? 'Không thể xoá — album còn bài hát liên kết' : (data.error || 'Không thể xoá');
+      toast(msg, 'error');
+    } else { toast('Đã xoá album', 'success'); load(); }
+    setConfirm(null);
+  };
+
+  const TYPE_LABELS = { ALBUM: 'Album', SINGLE: 'Single', EP: 'EP', COMPILATION: 'Tuyển tập' };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Album <span className="chip">{list.length}</span></span>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ Thêm album</button>
+        </div>
+        <div className="table-wrap">
+          {loading ? <div className="loading">Đang tải...</div> :
+          list.length === 0 ? <div className="empty"><div className="empty-icon">💿</div>Chưa có album nào</div> :
+          <table>
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tên album</th><th>Nghệ sĩ</th><th>Loại</th><th>Phát hành</th><th></th></tr></thead>
+            <tbody>
+              {list.map(a => (
+                <tr key={a.albumId}>
+                  <td className="td-mono">{a.albumId}</td>
+                  <td>
+                    {a.coverUrl
+                      ? <img src={BASE + a.coverUrl} className="avatar-img" style={{borderRadius: 6}} alt="" onError={e => e.target.style.display='none'} />
+                      : <div className="avatar-img" style={{borderRadius: 6}}>💿</div>}
+                  </td>
+                  <td style={{fontWeight: 500}}>{a.title}</td>
+                  <td style={{color: 'var(--muted)'}}>{a.artist?.name || '—'}</td>
+                  <td><span className="chip chip-accent">{TYPE_LABELS[a.albumType] || a.albumType}</span></td>
+                  <td className="td-mono">{a.releaseDate || '—'}</td>
+                  <td>
+                    <div className="td-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>Sửa</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(a)}>Xoá</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="overlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">{modal === 'add' ? 'Thêm album' : 'Sửa album'}</span>
+              <button className="modal-close" onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="field">
+                <label className="label">Nghệ sĩ *</label>
+                <select value={form.artistId} onChange={e => setForm({...form, artistId: e.target.value})}>
+                  <option value="">-- Chọn nghệ sĩ --</option>
+                  {artists.map(a => <option key={a.artistId} value={a.artistId}>{a.name}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label className="label">Tên album *</label>
+                <input type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="m-tp M-TP" />
+              </div>
+              <div className="row">
+                <div className="col">
+                  <div className="field">
+                    <label className="label">Loại</label>
+                    <select value={form.albumType} onChange={e => setForm({...form, albumType: e.target.value})}>
+                      <option value="ALBUM">Album</option>
+                      <option value="SINGLE">Single</option>
+                      <option value="EP">EP</option>
+                      <option value="COMPILATION">Tuyển tập</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="field">
+                    <label className="label">Ngày phát hành</label>
+                    <input type="date" value={form.releaseDate} onChange={e => setForm({...form, releaseDate: e.target.value})} />
+                  </div>
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Mô tả</label>
+                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} placeholder="Album đầu tay..." />
+              </div>
+              <FileInput label="Ảnh bìa (.jpg/.png)" accept=".jpg,.jpeg,.png" value={file} onChange={setFile} />
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Huỷ</button>
+              <button className="btn btn-primary" onClick={save} disabled={saving || !form.title.trim() || !form.artistId}>
+                {saving ? 'Đang lưu...' : 'Lưu'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title="Xoá album"
+          msg={`Xoá album "${confirm.title}"? Chỉ xoá được nếu album không còn track liên kết.`}
+          onConfirm={() => del(confirm.albumId)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TRACKS PAGE
+// ═══════════════════════════════════════════════════════════════════
+function TracksPage({ toast }) {
+  const [list, setList] = useState([]);
+  const [artists, setArtists] = useState([]);
+  const [albums, setAlbums] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+  const [confirm, setConfirm] = useState(null);
+  const [form, setForm] = useState({ title: '', artistId: '', albumId: '', duration: '', lyrics: '' });
+  const [mp3, setMp3] = useState(null);
+  const [mp3High, setMp3High] = useState(null);
+  const [cover, setCover] = useState(null);
+  const [selGenres, setSelGenres] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [lrcLoading, setLrcLoading] = useState(false);
+
+  // Tìm LRC tự động từ lrclib.net
+  const fetchLrc = async () => {
+    if (!form.title.trim()) { alert('Nhập tên bài hát trước'); return; }
+    const artist = artists.find(a => a.artistId == form.artistId);
+    const artistName = artist ? artist.name : '';
+    setLrcLoading(true);
+
+    try {
+      // Thử get chính xác trước (cần duration)
+      let syncedLyrics = null;
+      if (form.duration && artistName) {
+        const res = await fetch(
+          `https://lrclib.net/api/get?track_name=${encodeURIComponent(form.title)}&artist_name=${encodeURIComponent(artistName)}&duration=${form.duration}`
+        );
+        if (res.ok) {
+          const d = await res.json();
+          syncedLyrics = d.syncedLyrics || d.plainLyrics || null;
+        }
+      }
+
+      // Fallback: search
+      if (!syncedLyrics) {
+        const q = artistName ? `${form.title} ${artistName}` : form.title;
+        const res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const results = await res.json();
+          if (results.length > 0) {
+            // Ưu tiên bài có syncedLyrics
+            const best = results.find(r => r.syncedLyrics) || results[0];
+            syncedLyrics = best.syncedLyrics || best.plainLyrics || null;
+          }
+        }
+      }
+
+      if (syncedLyrics) {
+        setForm(f => ({ ...f, lyrics: syncedLyrics }));
+        alert(syncedLyrics.includes('[') ? '✓ Tìm thấy LRC có timestamp — lyrics sẽ sync theo nhạc!' : '✓ Tìm thấy plain text lyrics (không có timestamp).');
+      } else {
+        alert('Không tìm thấy lyrics cho bài này trên lrclib.net. Bạn có thể nhập tay theo định dạng LRC.');
+      }
+    } catch (e) {
+      alert('Lỗi kết nối đến lrclib.net');
+    }
+    setLrcLoading(false);
+  };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [t, a, al, g] = await Promise.all([
+      api('/api/tracks'), api('/api/artists'), api('/api/albums'), api('/api/genres')
+    ]);
+    setList(Array.isArray(t.data) ? t.data : (t.data.content || []));
+    setArtists(Array.isArray(a.data) ? a.data : (a.data.content || []));
+    setAlbums(Array.isArray(al.data) ? al.data : (al.data.content || []));
+    setGenres(Array.isArray(g.data) ? g.data : (g.data.content || []));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setForm({ title: '', artistId: '', albumId: '', duration: '', lyrics: '' });
+    setMp3(null); setMp3High(null); setCover(null); setSelGenres([]); setModal('add');
+  };
+  const openEdit = t => {
+    setForm({
+      title: t.title,
+      artistId: t.artist?.artistId || '',
+      albumId: t.album?.albumId || '',
+      duration: t.duration || '',
+      lyrics: t.lyrics || ''
+    });
+    setMp3(null); setMp3High(null); setCover(null);
+    setSelGenres((t.genres || []).map(g => g.genreId));
+    setModal(t);
+  };
+
+  // Upload track mới — FileController đã nhận lyrics + genreIds trực tiếp
+  const saveNew = async () => {
+    if (!form.title.trim() || !form.artistId || !mp3) return;
+    setSaving(true);
+    const fd = new FormData();
+    fd.append('file', mp3);
+    if (mp3High) fd.append('audioFileHigh', mp3High);
+    if (cover) fd.append('cover', cover);
+    fd.append('title', form.title);
+    fd.append('artistId', form.artistId);
+    if (form.albumId) fd.append('albumId', form.albumId);
+    if (form.duration) fd.append('duration', form.duration);
+    if (form.lyrics) fd.append('lyrics', form.lyrics);
+    selGenres.forEach(id => fd.append('genreIds', id));
+
+    const { ok, data } = await api('/api/admin/tracks/upload', { method: 'POST', body: fd });
+    setSaving(false);
+    if (!ok) { toast(data.error || 'Lỗi upload', 'error'); return; }
+    toast('Đã upload bài hát', 'success');
+    setModal(null); load();
+  };
+
+  // Sửa track hiện có — PUT /api/admin/tracks/{id} nhận genreIds trực tiếp
+  const saveEdit = async () => {
+    setSaving(true);
+    const fd = new FormData();
+    if (form.title) fd.append('title', form.title);
+    if (form.artistId) fd.append('artistId', form.artistId);
+    fd.append('albumId', form.albumId || '');
+    if (form.duration) fd.append('duration', form.duration);
+    fd.append('lyrics', form.lyrics || '');
+    if (cover) fd.append('cover', cover);
+    if (mp3High) fd.append('audioFileHigh', mp3High);
+    selGenres.forEach(id => fd.append('genreIds', id));
+
+    const { ok, data } = await api(`/api/admin/tracks/${modal.trackId}`, { method: 'PUT', body: fd });
+    setSaving(false);
+    if (!ok) { toast(data.error || 'Lỗi cập nhật', 'error'); return; }
+    toast('Đã cập nhật bài hát', 'success');
+    setModal(null); load();
+  };
+
+  const save = () => modal === 'add' ? saveNew() : saveEdit();
+
+  const del = async id => {
+    const { ok, status, data } = await api(`/api/admin/tracks/${id}`, { method: 'DELETE' });
+    if (!ok) {
+      const msg = status === 409 ? 'Không thể xoá — bài hát còn trong playlist hoặc lịch sử nghe' : (data.error || 'Không thể xoá');
+      toast(msg, 'error');
+    } else { toast('Đã xoá bài hát', 'success'); load(); }
+    setConfirm(null);
+  };
+
+  const fmtDur = s => { if (!s) return '—'; const m = Math.floor(s/60); return `${m}:${String(s%60).padStart(2,'0')}`; };
+  const filteredAlbums = form.artistId ? albums.filter(a => a.artist?.artistId == form.artistId) : albums;
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Bài hát <span className="chip">{list.length}</span></span>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ Upload bài hát</button>
+        </div>
+        <div className="table-wrap">
+          {loading ? <div className="loading">Đang tải...</div> :
+          list.length === 0 ? <div className="empty"><div className="empty-icon">🎵</div>Chưa có bài hát nào</div> :
+          <table>
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tên bài</th><th>Nghệ sĩ</th><th>Album</th><th>TG</th><th>Nghe</th><th></th></tr></thead>
+            <tbody>
+              {list.map(t => (
+                <tr key={t.trackId}>
+                  <td className="td-mono">{t.trackId}</td>
+                  <td>
+                    {t.coverUrl
+                      ? <img src={BASE + t.coverUrl} className="avatar-img" style={{borderRadius: 6}} alt="" onError={e => e.target.style.display='none'} />
+                      : <div className="avatar-img" style={{borderRadius: 6}}>♪</div>}
+                  </td>
+                  <td style={{fontWeight: 500, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{t.title}</td>
+                  <td style={{color: 'var(--muted)'}}>{t.artist?.name || '—'}</td>
+                  <td style={{color: 'var(--muted)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{t.album?.title || <span className="chip">Single</span>}</td>
+                  <td className="td-mono">{fmtDur(t.duration)}</td>
+                  <td className="td-mono">{(t.playCount || 0).toLocaleString()}</td>
+                  <td>
+                    <div className="td-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(t)}>Sửa</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(t)}>Xoá</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="overlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">{modal === 'add' ? 'Upload bài hát' : 'Sửa bài hát'}</span>
+              <button className="modal-close" onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              {modal === 'add' && (
+                <div className="field">
+                  <label className="label">File nhạc (.mp3) *</label>
+                  <div className="file-input-wrap" onClick={() => document.getElementById('mp3-input').click()}>
+                    <input id="mp3-input" type="file" accept=".mp3" style={{display:'none'}}
+                      onChange={e => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        setMp3(file);
+                        // Đọc duration tự động từ metadata audio
+                        const url = URL.createObjectURL(file);
+                        const audio = new Audio(url);
+                        audio.addEventListener('loadedmetadata', () => {
+                          const secs = Math.round(audio.duration);
+                          setForm(f => ({ ...f, duration: String(secs) }));
+                          URL.revokeObjectURL(url);
+                        });
+                      }} />
+                    {mp3
+                      ? <div className="file-name">📎 {mp3.name}</div>
+                      : <div>Chọn file .mp3</div>}
+                  </div>
+                </div>
+              )}
+              <div className="field">
+                <label className="label">File HD cho Premium (.mp3) — tuỳ chọn</label>
+                <div className="file-input-wrap" onClick={() => document.getElementById('mp3-high-input').click()}>
+                  <input id="mp3-high-input" type="file" accept=".mp3" style={{display:'none'}}
+                    onChange={e => setMp3High(e.target.files[0] || null)} />
+                  {mp3High
+                    ? <div className="file-name">📎 {mp3High.name}</div>
+                    : <div>Chọn bản bitrate cao{modal !== 'add' && modal.audioUrlHigh ? ' (đang có bản HD)' : ''}</div>}
+                </div>
+                <div style={{marginTop:4, fontSize:11, fontFamily:'var(--font-mono)',
+                  color: (mp3High || (modal !== 'add' && modal.audioUrlHigh)) ? 'var(--green)' : 'var(--muted)'}}>
+                  {mp3High
+                    ? '✓ Sẽ lưu bản HD — Premium nghe bản này + hiện badge HQ'
+                    : (modal !== 'add' && modal.audioUrlHigh)
+                      ? '✓ Bài đã có bản HD (chọn file mới để thay)'
+                      : 'Bỏ trống = không có HD, Premium nghe bản thường (không sao cả)'}
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Tên bài hát *</label>
+                <input type="text" value={form.title} onChange={e => setForm({...form, title: e.target.value})} placeholder="Em Của Ngày Hôm Qua" />
+              </div>
+              <div className="row">
+                <div className="col">
+                  <div className="field">
+                    <label className="label">Nghệ sĩ *</label>
+                    <select value={form.artistId} onChange={e => setForm({...form, artistId: e.target.value, albumId: ''})}>
+                      <option value="">-- Chọn nghệ sĩ --</option>
+                      {artists.map(a => <option key={a.artistId} value={a.artistId}>{a.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="col">
+                  <div className="field">
+                    <label className="label">Album (tuỳ chọn)</label>
+                    <select value={form.albumId} onChange={e => setForm({...form, albumId: e.target.value})}>
+                      <option value="">-- Single --</option>
+                      {filteredAlbums.map(a => <option key={a.albumId} value={a.albumId}>{a.title}</option>)}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Thời lượng (giây)</label>
+                <input type="number" value={form.duration} onChange={e => setForm({...form, duration: e.target.value})} placeholder="258 (4:18)" />
+              </div>
+              <FileInput label="Ảnh bìa (.jpg/.png)" accept=".jpg,.jpeg,.png" value={cover} onChange={setCover} />
+              <GenreSelect genres={genres} selected={selGenres} onChange={setSelGenres} />
+              <div className="field">
+                <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 6}}>
+                  <label className="label" style={{margin:0}}>Lời bài hát</label>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={fetchLrc} disabled={lrcLoading}
+                    style={{fontSize:11, padding:'3px 10px'}}>
+                    {lrcLoading ? 'Đang tìm...' : '✦ Tìm LRC tự động'}
+                  </button>
+                </div>
+                <textarea value={form.lyrics}
+                  onChange={e => setForm({...form, lyrics: e.target.value})}
+                  rows={7}
+                  style={{fontFamily: 'var(--font-mono)', fontSize: 12}}
+                  placeholder="Plain text: Em cua ngay hom qua&#10;Da roi xa mat roi&#10;&#10;LRC (sync): [00:12.34]Em cua ngay hom qua&#10;[00:16.89]Da roi xa mat roi" />
+                {form.lyrics && (
+                  <div style={{marginTop: 4, fontSize: 11, fontFamily: 'var(--font-mono)', color: form.lyrics.includes('[') ? 'var(--green)' : 'var(--amber)'}}>
+                    {form.lyrics.includes('[') ? '✓ LRC format — sẽ sync theo nhạc' : '⚠ Plain text — không sync, hiển thị toàn bộ một lúc'}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Huỷ</button>
+              <button className="btn btn-primary" onClick={save}
+                disabled={saving || !form.title.trim() || !form.artistId || (modal === 'add' && !mp3)}>
+                {saving ? (modal === 'add' ? 'Đang upload...' : 'Đang lưu...') : (modal === 'add' ? 'Upload' : 'Lưu')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title="Xoá bài hát"
+          msg={`Xoá "${confirm.title}"? File MP3 trên ổ đĩa cần xoá thủ công tại D:/music-files/audio/.`}
+          onConfirm={() => del(confirm.trackId)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+
+// ═══════════════════════════════════════════════════════════════════
+// GENRES PAGE
+// ═══════════════════════════════════════════════════════════════════
+function GenresPage({ toast }) {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null); // null | 'add' | {genreId,...}
+  const [confirm, setConfirm] = useState(null);
+  const [form, setForm] = useState({ name: '', coverColor: '#E91E63' });
+  const [coverFile, setCoverFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const coverRef = React.useRef();
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await api('/api/admin/genres');
+    setList(Array.isArray(data) ? data : (data.content || []));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setForm({ name: '', coverColor: '#E91E63' });
+    setCoverFile(null);
+    setModal('add');
+  };
+
+  const openEdit = g => {
+    setForm({ name: g.name, coverColor: g.coverColor || '#E91E63' });
+    setCoverFile(null);
+    setModal(g);
+  };
+
+  const save = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const isEdit = modal !== 'add';
+
+    // Gửi JSON (name + coverColor)
+    const { ok, data } = await api(
+      isEdit ? `/api/admin/genres/${modal.genreId}` : '/api/admin/genres',
+      { method: isEdit ? 'PUT' : 'POST', json: { name: form.name, coverColor: form.coverColor } }
+    );
+
+    if (!ok) { toast(data.error || 'Lỗi lưu', 'error'); setSaving(false); return; }
+
+    // Tương thích cả 2 trường hợp backend trả genreId hoặc id
+    const savedId = isEdit ? modal.genreId : (data.genreId || data.id);
+
+    // Upload ảnh cover nếu có (sau khi đã có genreId)
+    if (coverFile && savedId) {
+      const fd = new FormData();
+      fd.append('file', coverFile);
+      const { ok: okCover, data: coverData } = await api(
+        `/api/admin/genres/${savedId}/cover`,
+        { method: 'POST', body: fd }
+      );
+      if (!okCover) {
+        toast(`Upload ảnh thất bại: ${coverData.error || 'lỗi không xác định'}`, 'error');
+      }
+    } else if (coverFile && !savedId) {
+      toast('Không lấy được ID genre để upload ảnh', 'error');
+    }
+
+    setSaving(false);
+    toast(isEdit ? 'Đã cập nhật thể loại' : 'Đã thêm thể loại', 'success');
+    setModal(null);
+    load();
+  };
+
+  const del = async id => {
+    const { ok, status, data } = await api(`/api/admin/genres/${id}`, { method: 'DELETE' });
+    if (!ok) {
+      const msg = data.error || 'Không thể xoá thể loại';
+      toast(msg, 'error');
+    } else {
+      toast('Đã xoá thể loại', 'success');
+      load();
+    }
+    setConfirm(null);
+  };
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Thể loại <span className="chip">{list.length}</span></span>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ Thêm thể loại</button>
+        </div>
+        <div className="table-wrap">
+          {loading ? <div className="loading">Đang tải...</div> :
+          list.length === 0 ? <div className="empty"><div className="empty-icon">🎸</div>Chưa có thể loại nào</div> :
+          <table>
+            <thead><tr>
+              <th>#</th><th>Màu</th><th>Tên</th><th>Ảnh cover</th><th></th>
+            </tr></thead>
+            <tbody>
+              {list.map(g => (
+                <tr key={g.genreId}>
+                  <td className="td-mono">{g.genreId}</td>
+                  <td>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 6,
+                      background: g.coverColor || '#888',
+                      border: '1px solid var(--border)'
+                    }} title={g.coverColor} />
+                  </td>
+                  <td style={{fontWeight: 500}}>{g.name}</td>
+                  <td>
+                    {g.coverUrl && !g.coverUrl.includes('placeholder')
+                      ? <img src={BASE + g.coverUrl} style={{width:36, height:36, borderRadius:6, objectFit:'cover'}} alt=""
+                          onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='inline'; }} />
+                      : null}
+                  <span style={{color:'var(--muted)', display: (g.coverUrl && !g.coverUrl.includes('placeholder')) ? 'none' : 'inline'}}>—</span>
+                  </td>
+                  <td>
+                    <div className="td-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(g)}>Sửa</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(g)}>Xoá</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </div>
+      </div>
+
+      {modal && (
+        <div className="overlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">{modal === 'add' ? 'Thêm thể loại' : 'Sửa thể loại'}</span>
+              <button className="modal-close" onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="field">
+                <label className="label">Tên thể loại *</label>
+                <input type="text" value={form.name} maxLength={100}
+                  onChange={e => setForm({...form, name: e.target.value})}
+                  placeholder="V-Pop, Ballad, EDM..." />
+              </div>
+
+              <div className="field">
+                <label className="label">Màu nền</label>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <input type="color" value={form.coverColor}
+                    onChange={e => setForm({...form, coverColor: e.target.value})}
+                    style={{width:48, height:40, padding:2, cursor:'pointer', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg3)'}} />
+                  <div style={{
+                    flex:1, height:40, borderRadius:8,
+                    background: form.coverColor,
+                    border: '1px solid var(--border)',
+                    display:'flex', alignItems:'center', justifyContent:'center'
+                  }}>
+                    <span style={{fontSize:12, fontFamily:'var(--font-mono)', color:'#fff',
+                      textShadow:'0 1px 3px #0008'}}>
+                      {form.name || 'Preview'}
+                    </span>
+                  </div>
+                  <span style={{fontFamily:'var(--font-mono)', fontSize:12, color:'var(--muted)'}}>
+                    {form.coverColor}
+                  </span>
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="label">Ảnh cover (tuỳ chọn)</label>
+                <div className="file-input-wrap" onClick={() => coverRef.current.click()}>
+                  <input ref={coverRef} type="file" accept=".jpg,.jpeg,.png"
+                    style={{display:'none'}}
+                    onChange={e => {
+                    const f = e.target.files[0];
+                    if (f && !f.type.startsWith('image/')) {
+                      alert('Chỉ chấp nhận file ảnh (.jpg, .png)');
+                      return;
+                    }
+                    setCoverFile(f);
+                  }} />
+                  {coverFile
+                    ? <div className="file-name">📎 {coverFile.name}</div>
+                    : <div>Chọn ảnh .jpg/.png{modal !== 'add' && modal.coverUrl ? ' (đang có ảnh)' : ''}</div>}
+                </div>
+                {modal !== 'add' && modal.coverUrl && !coverFile && (
+                  <img src={BASE + modal.coverUrl} alt=""
+                    style={{marginTop:8, width:64, height:64, borderRadius:8, objectFit:'cover'}}
+                    onError={e => e.target.style.display='none'} />
+                )}
+                <div style={{fontSize:11, color:'var(--muted)', marginTop:4}}>
+                  Nếu không upload ảnh, UI sẽ dùng màu nền thay thế (Spotify-style).
+                </div>
+              </div>
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Huỷ</button>
+              <button className="btn btn-primary" onClick={save}
+                disabled={saving || !form.name.trim()}>
+                {saving ? 'Đang lưu...' : 'Lưu'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title="Xoá thể loại"
+          msg={`Xoá thể loại "${confirm.name}"? Các bài hát đang gắn thể loại này sẽ tự động được gỡ liên kết.`}
+          onConfirm={() => del(confirm.genreId)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PLAYLISTS PAGE (curated / mood) — nguồn dữ liệu cho trang chủ app
+// ═══════════════════════════════════════════════════════════════════
+// Chỉ 6 mood dưới đây có "hàng riêng" trên trang chủ (xem HomeFeedService).
+// FOCUS / SLEEP có trong enum backend nhưng KHÔNG render hàng nào nên bỏ qua.
+const MOODS = [
+  { v: '',          label: '— Không gắn mood (chỉ vào "Tuyển tập hàng đầu") —' },
+  { v: 'WORKOUT',   label: 'Tập luyện  → hàng "Tập luyện"' },
+  { v: 'NOSTALGIC', label: 'Hoài niệm  → hàng "Hoài niệm"' },
+  { v: 'PARTY',     label: 'Tiệc tùng  → hàng "Tiệc tùng"' },
+  { v: 'HAPPY',     label: 'Vui vẻ     → hàng "Vui vẻ"' },
+  { v: 'RELAX',     label: 'Thư giãn   → hàng "Thư giãn"' },
+  { v: 'KARAOKE',   label: 'Hát theo   → hàng "Hát theo"' },
+];
+const MOOD_LABEL = { WORKOUT:'Tập luyện', NOSTALGIC:'Hoài niệm', PARTY:'Tiệc tùng', HAPPY:'Vui vẻ', RELAX:'Thư giãn', KARAOKE:'Hát theo' };
+
+function PlaylistsPage({ toast }) {
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);   // null | 'add' | {playlistId,...}
+  const [confirm, setConfirm] = useState(null);
+  const [form, setForm] = useState({ name: '', description: '', mood: '', coverColor: '#7c6af7', isPublic: true });
+  const [coverFile, setCoverFile] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const coverRef = React.useRef();
+
+  // Track manager
+  const [tracksFor, setTracksFor] = useState(null); // playlist đang quản lý bài
+  const [plTracks, setPlTracks] = useState([]);
+  const [allTracks, setAllTracks] = useState([]);
+  const [tracksLoading, setTracksLoading] = useState(false);
+  const [addId, setAddId] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data } = await api('/api/admin/playlists');
+    setList(Array.isArray(data) ? data : (data.content || []));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openAdd = () => {
+    setForm({ name: '', description: '', mood: '', coverColor: '#7c6af7', isPublic: true });
+    setCoverFile(null); setModal('add');
+  };
+  const openEdit = p => {
+    setForm({
+      name: p.name, description: p.description || '',
+      mood: p.mood || '', coverColor: p.coverColor || '#7c6af7',
+      isPublic: p.isPublic !== false
+    });
+    setCoverFile(null); setModal(p);
+  };
+
+  const save = async () => {
+    if (!form.name.trim()) return;
+    setSaving(true);
+    const isEdit = modal !== 'add';
+    const body = {
+      name: form.name, description: form.description,
+      mood: form.mood || null, coverColor: form.coverColor, isPublic: form.isPublic
+    };
+    const { ok, data } = await api(
+      isEdit ? `/api/admin/playlists/${modal.playlistId}` : '/api/admin/playlists',
+      { method: isEdit ? 'PUT' : 'POST', json: body }
+    );
+    if (!ok) { toast(data.error || 'Lỗi lưu', 'error'); setSaving(false); return; }
+
+    const savedId = isEdit ? modal.playlistId : data.playlistId;
+    if (coverFile && savedId) {
+      const fd = new FormData();
+      fd.append('file', coverFile);
+      const { ok: okCover, data: cd } = await api(`/api/admin/playlists/${savedId}/cover`, { method: 'POST', body: fd });
+      if (!okCover) toast(`Upload ảnh thất bại: ${cd.error || '?'}`, 'error');
+    }
+    setSaving(false);
+    toast(isEdit ? 'Đã cập nhật playlist' : 'Đã tạo playlist', 'success');
+    setModal(null); load();
+  };
+
+  const del = async id => {
+    const { ok, data } = await api(`/api/admin/playlists/${id}`, { method: 'DELETE' });
+    if (!ok) toast(data.error || 'Không thể xoá', 'error');
+    else { toast('Đã xoá playlist', 'success'); load(); }
+    setConfirm(null);
+  };
+
+  // ── Track manager ──
+  const openTracks = async p => {
+    setTracksFor(p); setAddId(''); setTracksLoading(true);
+    const [pt, at] = await Promise.all([
+      api(`/api/admin/playlists/${p.playlistId}/tracks`),
+      allTracks.length ? Promise.resolve({ data: allTracks }) : api('/api/tracks')
+    ]);
+    setPlTracks(Array.isArray(pt.data) ? pt.data : []);
+    setAllTracks(Array.isArray(at.data) ? at.data : (at.data.content || []));
+    setTracksLoading(false);
+  };
+  const reloadPlTracks = async pid => {
+    const { data } = await api(`/api/admin/playlists/${pid}/tracks`);
+    setPlTracks(Array.isArray(data) ? data : []);
+    load(); // cập nhật trackCount ở bảng ngoài
+  };
+  const addTrack = async () => {
+    if (!addId) return;
+    const { ok, data } = await api(`/api/admin/playlists/${tracksFor.playlistId}/tracks?trackId=${addId}`, { method: 'POST' });
+    if (!ok) { toast(data.error || 'Lỗi thêm bài', 'error'); return; }
+    setAddId(''); reloadPlTracks(tracksFor.playlistId);
+  };
+  const removeTrack = async tid => {
+    const { ok } = await api(`/api/admin/playlists/${tracksFor.playlistId}/tracks/${tid}`, { method: 'DELETE' });
+    if (ok) reloadPlTracks(tracksFor.playlistId);
+  };
+  const move = async (idx, dir) => {
+    const next = [...plTracks];
+    const j = idx + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[idx], next[j]] = [next[j], next[idx]];
+    setPlTracks(next); // cập nhật ngay cho mượt
+    const trackIds = next.map(t => t.trackId);
+    await api(`/api/admin/playlists/${tracksFor.playlistId}/tracks/order`, { method: 'PUT', json: { trackIds } });
+  };
+
+  const inPlaylist = new Set(plTracks.map(t => t.trackId));
+  const addable = allTracks.filter(t => !inPlaylist.has(t.trackId));
+
+  return (
+    <div>
+      <div className="card">
+        <div className="card-head">
+          <span className="card-title">Playlist gợi ý <span className="chip">{list.length}</span></span>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ Tạo playlist</button>
+        </div>
+        <div style={{padding:'10px 20px', fontSize:12, color:'var(--muted)', borderBottom:'1px solid var(--border)'}}>
+          Đây là playlist hệ thống (curated). Banner đầu trang chủ = playlist đầu tiên; gắn mood để vào đúng hàng cảm xúc trên trang chủ.
+        </div>
+        <div className="table-wrap">
+          {loading ? <div className="loading">Đang tải...</div> :
+          list.length === 0 ? <div className="empty"><div className="empty-icon">✨</div>Chưa có playlist gợi ý nào</div> :
+          <table>
+            <thead><tr><th>#</th><th>Ảnh</th><th>Tên</th><th>Mood</th><th>Số bài</th><th></th></tr></thead>
+            <tbody>
+              {list.map(p => (
+                <tr key={p.playlistId}>
+                  <td className="td-mono">{p.playlistId}</td>
+                  <td>
+                    {p.coverUrl && !p.coverUrl.includes('placeholder')
+                      ? <img src={BASE + p.coverUrl} className="avatar-img" style={{borderRadius:6}} alt="" onError={e => e.target.style.display='none'} />
+                      : <div className="avatar-img" style={{borderRadius:6, background:p.coverColor || '#888'}}>♪</div>}
+                  </td>
+                  <td style={{fontWeight:500}}>{p.name}</td>
+                  <td>{p.mood ? <span className="chip chip-accent">{MOOD_LABEL[p.mood] || p.mood}</span> : <span className="chip">—</span>}</td>
+                  <td className="td-mono">{p.trackCount ?? 0}</td>
+                  <td>
+                    <div className="td-actions">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openTracks(p)}>Bài hát</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(p)}>Sửa</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setConfirm(p)}>Xoá</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+        </div>
+      </div>
+
+      {/* Modal tạo/sửa */}
+      {modal && (
+        <div className="overlay" onClick={() => setModal(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">{modal === 'add' ? 'Tạo playlist gợi ý' : 'Sửa playlist'}</span>
+              <button className="modal-close" onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="field">
+                <label className="label">Tên playlist *</label>
+                <input type="text" value={form.name} maxLength={100}
+                  onChange={e => setForm({...form, name: e.target.value})} placeholder="Chill tối nay, Nhạc Việt thịnh hành..." />
+              </div>
+              <div className="field">
+                <label className="label">Mô tả</label>
+                <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                  placeholder="Những bản hit nhẹ nhàng cho buổi tối..." />
+              </div>
+              <div className="field">
+                <label className="label">Mood (quyết định hàng nào trên trang chủ)</label>
+                <select value={form.mood} onChange={e => setForm({...form, mood: e.target.value})}>
+                  {MOODS.map(m => <option key={m.v} value={m.v}>{m.label}</option>)}
+                </select>
+              </div>
+              <div className="field">
+                <label className="label">Màu nền (khi chưa có ảnh)</label>
+                <div style={{display:'flex', alignItems:'center', gap:12}}>
+                  <input type="color" value={form.coverColor}
+                    onChange={e => setForm({...form, coverColor: e.target.value})}
+                    style={{width:48, height:40, padding:2, cursor:'pointer', borderRadius:8, border:'1px solid var(--border)', background:'var(--bg3)'}} />
+                  <div style={{flex:1, height:40, borderRadius:8, background:form.coverColor, border:'1px solid var(--border)',
+                    display:'flex', alignItems:'center', justifyContent:'center'}}>
+                    <span style={{fontSize:12, fontFamily:'var(--font-mono)', color:'#fff', textShadow:'0 1px 3px #0008'}}>
+                      {form.name || 'Preview'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="field">
+                <label className="label">Ảnh bìa (tuỳ chọn)</label>
+                <div className="file-input-wrap" onClick={() => coverRef.current.click()}>
+                  <input ref={coverRef} type="file" accept=".jpg,.jpeg,.png" style={{display:'none'}}
+                    onChange={e => {
+                      const f = e.target.files[0];
+                      if (f && !f.type.startsWith('image/')) { alert('Chỉ chấp nhận ảnh'); return; }
+                      setCoverFile(f);
+                    }} />
+                  {coverFile
+                    ? <div className="file-name">📎 {coverFile.name}</div>
+                    : <div>Chọn ảnh .jpg/.png{modal !== 'add' && modal.coverUrl ? ' (đang có ảnh)' : ''}</div>}
+                </div>
+              </div>
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setModal(null)}>Huỷ</button>
+              <button className="btn btn-primary" onClick={save} disabled={saving || !form.name.trim()}>
+                {saving ? 'Đang lưu...' : 'Lưu'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal quản lý bài hát */}
+      {tracksFor && (
+        <div className="overlay" onClick={() => setTracksFor(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-head">
+              <span className="modal-title">Bài hát — {tracksFor.name}</span>
+              <button className="modal-close" onClick={() => setTracksFor(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="field">
+                <label className="label">Thêm bài vào playlist</label>
+                <div style={{display:'flex', gap:8}}>
+                  <select value={addId} onChange={e => setAddId(e.target.value)} style={{flex:1}}>
+                    <option value="">-- Chọn bài hát --</option>
+                    {addable.map(t => (
+                      <option key={t.trackId} value={t.trackId}>
+                        {t.title}{t.artist?.name ? ` — ${t.artist.name}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="btn btn-primary" onClick={addTrack} disabled={!addId}>Thêm</button>
+                </div>
+              </div>
+
+              <label className="label">Trong playlist ({plTracks.length})</label>
+              {tracksLoading ? <div className="loading">Đang tải...</div> :
+               plTracks.length === 0 ? <div className="empty" style={{padding:'20px'}}>Chưa có bài nào</div> :
+               plTracks.map((t, i) => (
+                 <div className="tk-row" key={t.trackId}>
+                   <span className="tk-pos">{i + 1}</span>
+                   <div className="tk-name">
+                     {t.title}
+                     {t.artist?.name && <span className="tk-artist"> — {t.artist.name}</span>}
+                   </div>
+                   <button className="tk-btn" disabled={i === 0} onClick={() => move(i, -1)} title="Lên">▲</button>
+                   <button className="tk-btn" disabled={i === plTracks.length - 1} onClick={() => move(i, 1)} title="Xuống">▼</button>
+                   <button className="tk-btn" onClick={() => removeTrack(t.trackId)} title="Gỡ" style={{color:'var(--red)'}}>✕</button>
+                 </div>
+               ))}
+            </div>
+            <div className="modal-foot">
+              <button className="btn btn-ghost" onClick={() => setTracksFor(null)}>Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirm && (
+        <ConfirmModal
+          title="Xoá playlist"
+          msg={`Xoá playlist "${confirm.name}"? Sẽ gỡ playlist khỏi trang chủ app. Bài hát gốc không bị xoá.`}
+          onConfirm={() => del(confirm.playlistId)}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MAIN APP
+// ═══════════════════════════════════════════════════════════════════
+const PAGES = [
+  { id: 'artists',   label: 'Nghệ sĩ',       icon: '🎤' },
+  { id: 'albums',    label: 'Album',         icon: '💿' },
+  { id: 'tracks',    label: 'Bài hát',       icon: '🎵' },
+  { id: 'genres',    label: 'Thể loại',      icon: '🎸' },
+  { id: 'playlists', label: 'Playlist gợi ý', icon: '✨' },
+];
+
+function App() {
+  const [user, setUser] = useState(() => {
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+    return token ? { token, username } : null;
+  });
+  const [page, setPage] = useState('tracks');
+  const [toastState, setToastState] = useState(null);
+
+  const toast = (msg, type = 'success') => setToastState({ msg, type, key: Date.now() });
+
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    setUser(null);
+  };
+
+  if (!user) return <LoginPage onLogin={u => setUser(u)} />;
+
+  const PAGE_COMPS = {
+    artists: ArtistsPage, albums: AlbumsPage, tracks: TracksPage,
+    genres: GenresPage, playlists: PlaylistsPage
+  };
+  const PageComp = PAGE_COMPS[page] || TracksPage;
+
+  const PAGE_TITLES = { artists: 'Nghệ sĩ', albums: 'Album', tracks: 'Bài hát', genres: 'Thể loại', playlists: 'Playlist gợi ý' };
+
+  return (
+    <div className="app">
+      <nav className="sidebar">
+        <div className="sidebar-logo">♪ MUSIC ADMIN</div>
+        <div className="sidebar-nav">
+          {PAGES.map(p => (
+            <div key={p.id}
+              className={`nav-item ${page === p.id ? 'active' : ''}`}
+              onClick={() => setPage(p.id)}>
+              <span className="nav-icon">{p.icon}</span>
+              {p.label}
+            </div>
+          ))}
+        </div>
+        <div className="sidebar-user">
+          <div className="user-avatar">{(user.username || 'A')[0].toUpperCase()}</div>
+          <div className="user-info">
+            <div className="user-name">{user.username}</div>
+            <div className="user-role">admin</div>
+          </div>
+          <button className="logout-btn" onClick={logout} title="Đăng xuất">⏻</button>
+        </div>
+      </nav>
+
+      <main className="main">
+        <div className="topbar">
+          <div>
+            <div className="topbar-title">{PAGE_TITLES[page]}</div>
+          </div>
+          <span className="topbar-sub">localhost:8080</span>
+        </div>
+        <div className="content">
+          <PageComp toast={toast} />
+        </div>
+      </main>
+
+      {toastState && (
+        <Toast key={toastState.key} msg={toastState.msg} type={toastState.type}
+          onDone={() => setToastState(null)} />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

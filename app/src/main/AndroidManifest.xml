@@ -49,8 +49,6 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".EditPlaylistActivity" android:exported="false"
             android:screenOrientation="portrait"/>
-        <activity android:name=".LikedSongsActivity" android:exported="false"
-            android:screenOrientation="portrait"/>
         <activity android:name=".PlaylistCoverPickerActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".PremiumPlansActivity" android:exported="false"
@@ -68,8 +66,6 @@
         <activity android:name=".AddAccountActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".ListeningStatsActivity" android:exported="false"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".RecentActivity" android:exported="false"
             android:screenOrientation="portrait"/>
         <activity android:name=".AddArtistActivity" android:exported="false"
             android:screenOrientation="portrait"/>

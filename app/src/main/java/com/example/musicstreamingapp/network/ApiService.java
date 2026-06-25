@@ -106,6 +106,9 @@ public interface ApiService {
     @GET("api/albums/new") Call<List<Album>> getNewReleases();
     @GET("api/albums/{id}") Call<Album> getAlbum(@Path("id") Long id);
     @GET("api/albums/{id}/tracks") Call<List<Track>> getAlbumTracks(@Path("id") Long id);
+    @GET("api/albums/saved") Call<List<Album>> getSavedAlbums();
+    @GET("api/albums/{id}/saved") Call<Map<String, Boolean>> getAlbumSaved(@Path("id") Long id);
+    @POST("api/albums/{id}/save") Call<Map<String, Boolean>> toggleSaveAlbum(@Path("id") Long id);
 
     // Genres
     @GET("api/genres") Call<List<Genre>> getGenres();

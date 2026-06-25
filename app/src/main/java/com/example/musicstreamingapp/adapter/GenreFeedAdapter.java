@@ -11,12 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.musicstreamingapp.AlbumDetailActivity;
 import com.example.musicstreamingapp.util.NavHelper;
-import com.example.musicstreamingapp.ArtistDetailActivity;
 import com.example.musicstreamingapp.GenreDetailActivity;
 import com.example.musicstreamingapp.PlayerActivity;
-import com.example.musicstreamingapp.PlaylistDetailActivity;
 import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;

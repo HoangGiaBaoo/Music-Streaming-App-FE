@@ -27,7 +27,6 @@
     <!-- Search -->
     <string name="search_title">Tìm kiếm</string>
     <string name="search_hint">Bạn muốn nghe gì?</string>
-    <string name="search_explore">Khám phá nội dung mới mẻ</string>
     <string name="search_browse_all">Duyệt tìm tất cả</string>
 
     <!-- Library -->
@@ -76,6 +75,29 @@
     <string name="shuffle_gate_premium_title">Tùy chỉnh hoàn toàn trải nghiệm nghe của bạn</string>
     <string name="shuffle_gate_premium_sub">Phát nhạc theo thứ tự bất kỳ, trộn bài hoặc Trộn bài thông minh với gói Premium.</string>
     <string name="shuffle_gate_cta">Khám phá Premium</string>
+
+    <!-- Gate tải xuống (Free chạm nút Tải về) -->
+    <string name="download_gate_title">Bạn muốn tải nhạc của %1$s xuống?</string>
+    <string name="download_gate_desc">Tải nhạc xuống để nghe mà không cần Wi-Fi và tiết kiệm dữ liệu di động với gói Premium.</string>
+    <string name="download_gate_skip">Bỏ qua</string>
+
+    <!-- Menu 3 chấm playlist / album + thao tác Thư viện -->
+    <string name="action_download">Tải xuống</string>
+    <string name="action_add_to_this_playlist">Thêm vào danh sách phát này</string>
+    <string name="action_edit_playlist">Chỉnh sửa danh sách phát</string>
+    <string name="action_name_and_details">Tên và thông tin chi tiết</string>
+    <string name="action_create_cover">Tạo ảnh bìa</string>
+    <string name="action_delete_playlist">Xoá danh sách phát</string>
+    <string name="action_add_to_library">Thêm vào Thư viện</string>
+    <string name="action_remove_from_library">Xóa khỏi Thư viện</string>
+    <string name="action_go_to_artist">Chuyển tới trang nghệ sĩ</string>
+    <string name="album_added_to_library">Đã thêm vào Thư viện.</string>
+    <string name="album_removed_from_library">Đã xóa khỏi Thư viện.</string>
+    <string name="download">Tải xuống</string>
+    <string name="more_options">Tùy chọn khác</string>
+    <string name="add_to_library">Thêm vào Thư viện</string>
+    <string name="delete_playlist_confirm_title">Xóa danh sách phát?</string>
+    <string name="delete_playlist_confirm_msg">Bạn có chắc muốn xóa danh sách phát này?</string>
 
     <!-- Create -->
     <string name="create_playlist">Danh sách phát</string>

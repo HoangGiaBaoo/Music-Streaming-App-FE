@@ -21,6 +21,7 @@ import com.example.musicstreamingapp.R;
 import com.example.musicstreamingapp.adapter.LibraryAdapter;
 import com.example.musicstreamingapp.data.repository.LibraryRepository;
 import com.example.musicstreamingapp.databinding.FragmentLibraryBinding;
+import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
@@ -82,6 +83,7 @@ public class LibraryFragment extends Fragment {
         vm.chip().observe(getViewLifecycleOwner(), c -> { renderChipState(c); renderCurrent(); });
         vm.playlists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
         vm.artists().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
+        vm.savedAlbums().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
         vm.liked().observe(getViewLifecycleOwner(), data -> { renderCurrent(); if (data != null && !data.isEmpty()) hideShimmer(); });
         vm.likedCount().observe(getViewLifecycleOwner(), n -> renderCurrent());
     }
@@ -118,6 +120,7 @@ public class LibraryFragment extends Fragment {
             case ALL:
                 addPlaylists(vm.playlists().getValue());
                 addArtists(vm.artists().getValue());
+                addAlbums(vm.savedAlbums().getValue());
                 break;
             case PLAYLIST:
                 addPlaylists(vm.playlists().getValue());
@@ -129,6 +132,8 @@ public class LibraryFragment extends Fragment {
                 addLiked(vm.liked().getValue());
                 break;
             case ALBUM:
+                addAlbums(vm.savedAlbums().getValue());
+                break;
             default:
                 break;
         }
@@ -136,7 +141,7 @@ public class LibraryFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    /** Item ghim "Bài hát đã thích" (playlist ảo) — luôn ở đầu danh sách, mở LikedSongsActivity. */
+    /** Item ghim "Bài hát đã thích" (playlist ảo) — luôn ở đầu danh sách, mở LikedSongsFragment. */
     private void addLikedSongsPinned() {
         Integer count = vm.likedCount().getValue();
         int n = count != null ? count : 0;
@@ -161,6 +166,16 @@ public class LibraryFragment extends Fragment {
             items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_ARTIST,
                 a.getAvatarUrl(), a.getName(), "Nghệ sĩ",
                 () -> openArtist(a)));
+        }
+    }
+
+    private void addAlbums(List<Album> data) {
+        if (data == null) return;
+        for (Album a : data) {
+            String subtitle = a.getArtist() != null ? a.getArtist().getName() : "Album";
+            items.add(LibraryAdapter.Item.row(LibraryAdapter.TYPE_ALBUM,
+                a.getCoverUrl(), a.getTitle(), subtitle,
+                () -> NavHelper.openAlbum(requireContext(), a.getAlbumId())));
         }
     }
 

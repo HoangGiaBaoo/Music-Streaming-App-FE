@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.musicstreamingapp.data.RepoCallback;
 import com.example.musicstreamingapp.data.repository.LibraryRepository;
+import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Artist;
 import com.example.musicstreamingapp.model.Playlist;
 import com.example.musicstreamingapp.model.Track;
@@ -22,6 +23,7 @@ public class LibraryViewModel extends ViewModel {
     private final MutableLiveData<Chip> chip = new MutableLiveData<>(Chip.ALL);
     private final MutableLiveData<List<Playlist>> playlists = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Artist>> artists = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<Album>> savedAlbums = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<Track>> liked = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<Integer> likedCount = new MutableLiveData<>(0);
 
@@ -34,6 +36,7 @@ public class LibraryViewModel extends ViewModel {
     public LiveData<Chip> chip()                   { return chip; }
     public LiveData<List<Playlist>> playlists()    { return playlists; }
     public LiveData<List<Artist>> artists()        { return artists; }
+    public LiveData<List<Album>> savedAlbums()     { return savedAlbums; }
     public LiveData<List<Track>> liked()           { return liked; }
     public LiveData<Integer> likedCount()          { return likedCount; }
 
@@ -55,6 +58,7 @@ public class LibraryViewModel extends ViewModel {
             case ALL:
                 loadPlaylists();
                 loadArtists();
+                loadSavedAlbums();
                 break;
             case PLAYLIST:
                 loadPlaylists();
@@ -69,8 +73,9 @@ public class LibraryViewModel extends ViewModel {
                 });
                 break;
             case ALBUM:
+                loadSavedAlbums();
+                break;
             default:
-                /* no albums endpoint hooked up — original code left blank */
                 break;
         }
     }
@@ -88,6 +93,13 @@ public class LibraryViewModel extends ViewModel {
         repo.getFollowedArtists(new RepoCallback<List<Artist>>() {
             @Override public void onSuccess(List<Artist> data) { artists.postValue(data); }
             @Override public void onError(String message) { artists.postValue(Collections.emptyList()); }
+        });
+    }
+
+    private void loadSavedAlbums() {
+        repo.getSavedAlbums(new RepoCallback<List<Album>>() {
+            @Override public void onSuccess(List<Album> data) { savedAlbums.postValue(data); }
+            @Override public void onError(String message) { savedAlbums.postValue(Collections.emptyList()); }
         });
     }
 

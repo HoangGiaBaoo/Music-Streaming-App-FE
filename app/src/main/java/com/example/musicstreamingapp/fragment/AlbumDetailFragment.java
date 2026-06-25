@@ -21,8 +21,10 @@ import com.example.musicstreamingapp.databinding.FragmentAlbumDetailBinding;
 import com.example.musicstreamingapp.model.Album;
 import com.example.musicstreamingapp.model.Track;
 import com.example.musicstreamingapp.network.RetrofitClient;
+import com.example.musicstreamingapp.util.NavHelper;
 import com.example.musicstreamingapp.util.PlayerManager;
 import com.example.musicstreamingapp.util.PremiumChecker;
+import com.example.musicstreamingapp.util.ShuffleController;
 import com.example.musicstreamingapp.viewmodel.AlbumDetailViewModel;
 import com.example.musicstreamingapp.viewmodel.SubscriptionViewModel;
 import com.example.musicstreamingapp.viewmodel.VmFactory;
@@ -56,7 +58,11 @@ public class AlbumDetailFragment extends BaseDetailFragment {
     private boolean shimmerHidden = false;
 
     private SubscriptionViewModel subVm;
-    private boolean isPremium = false;
+    private ShuffleController shuffle;
+
+    @Nullable private Album currentAlbum;
+    /** true khi user vừa chạm nút thêm/xóa Thư viện → hiện toast khi server trả về. */
+    private boolean pendingLibraryToggle = false;
 
     @Nullable
     @Override
@@ -81,14 +87,22 @@ public class AlbumDetailFragment extends BaseDetailFragment {
         });
         b.rvTracks.setAdapter(adapter);
 
-        b.btnPlayAll.setOnClickListener(v -> playRespectingShuffle());
-        b.btnShuffle.setOnClickListener(v -> onShuffleClicked());
+        b.btnPlayFab.setOnClickListener(v -> playRespectingShuffle());
+        b.btnShuffle.setOnClickListener(v -> shuffle.onShuffleClicked());
+        b.btnAddLibrary.setOnClickListener(v -> {
+            pendingLibraryToggle = true;
+            vm.toggleSaved();
+        });
+        b.btnDownload.setOnClickListener(v -> showDownloadGate());
+        b.btnMore.setOnClickListener(v -> showAlbumMenu());
 
         // Tạo ViewModel (nhẹ, chưa gọi mạng) để listener dùng được ngay.
         vm = new ViewModelProvider(this, new VmFactory(requireContext())).get(AlbumDetailViewModel.class);
         vm.setAlbumId(albumId);
         subVm = new ViewModelProvider(this, new VmFactory(requireContext())).get(SubscriptionViewModel.class);
-        updateShuffleUi();
+        shuffle = new ShuffleController(getChildFragmentManager(), on ->
+            b.btnShuffle.setColorFilter(ContextCompat.getColor(requireContext(),
+                on ? R.color.spotify_green : R.color.text_secondary)));
 
         scheduleDeferredSetup();
     }
@@ -103,39 +117,53 @@ public class AlbumDetailFragment extends BaseDetailFragment {
         vm.loadIfNeeded();
 
         // Premium mới bật/tắt trộn bài được; Free bị ép trộn (chạm shuffle để tắt → gate).
-        subVm.subscription().observe(getViewLifecycleOwner(), sub -> {
-            isPremium = PremiumChecker.isPremium(sub);
-            if (!isPremium) PlayerManager.getInstance().setShuffleEnabled(true);
-            updateShuffleUi();
-        });
+        subVm.subscription().observe(getViewLifecycleOwner(), sub ->
+            shuffle.setPremium(PremiumChecker.isPremium(sub)));
         subVm.loadCurrentSubscription();
     }
 
     /** Nút "Phát tất cả": phát theo trạng thái trộn bài (ngẫu nhiên nếu đang bật). Không gate. */
     private void playRespectingShuffle() {
         if (tracks.isEmpty()) return;
-        int start = PlayerManager.getInstance().isShuffleEnabled()
-            ? (int) (Math.random() * tracks.size()) : 0;
+        int start = shuffle.startIndex(tracks.size());
         PlayerManager.getInstance().play(requireContext(), tracks.get(start), tracks, start);
         startActivity(new Intent(requireContext(), PlayerActivity.class));
     }
 
-    /** Free: chạm shuffle (cố tắt) → gate Premium. Premium: bật/tắt trộn bài thật. */
-    private void onShuffleClicked() {
-        if (!isPremium) {
-            new ShuffleGateBottomSheet().show(getChildFragmentManager(), "shuffle_gate");
-            return;
-        }
-        PlayerManager pm = PlayerManager.getInstance();
-        pm.setShuffleEnabled(!pm.isShuffleEnabled());
-        updateShuffleUi();
+    /** Nút thêm Thư viện: dấu tích xanh khi đã lưu, dấu cộng xám khi chưa. */
+    private void updateLibraryUi(boolean saved) {
+        b.btnAddLibrary.setImageResource(
+            saved ? R.drawable.ic_check_circle_green : R.drawable.ic_add_circle_outline);
+        b.btnAddLibrary.setColorFilter(ContextCompat.getColor(requireContext(),
+            saved ? R.color.spotify_green : R.color.text_secondary));
     }
 
-    /** Nút "Shuffle" chữ xanh khi bật, xám khi tắt (chỉ Premium mới tắt được). */
-    private void updateShuffleUi() {
-        boolean on = PlayerManager.getInstance().isShuffleEnabled();
-        b.btnShuffle.setTextColor(ContextCompat.getColor(requireContext(),
-            on ? R.color.spotify_green : R.color.text_secondary));
+    /** Tải về luôn mở gate Premium (bản học tập chưa tải file thật). */
+    private void showDownloadGate() {
+        String name = currentAlbum != null && currentAlbum.getTitle() != null
+            ? currentAlbum.getTitle() : "";
+        String cover = currentAlbum != null ? currentAlbum.getCoverUrl() : null;
+        DownloadGateBottomSheet.newInstance(name, cover).show(getChildFragmentManager(), "download_gate");
+    }
+
+    /** Menu 3 chấm của album (thêm/xóa Thư viện, tải→gate, tới nghệ sĩ). */
+    private void showAlbumMenu() {
+        if (currentAlbum == null) return;
+        boolean saved = Boolean.TRUE.equals(vm.saved().getValue());
+        AlbumMenuBottomSheet sheet = AlbumMenuBottomSheet.newInstance(currentAlbum, saved);
+        sheet.setListener(new AlbumMenuBottomSheet.Listener() {
+            @Override public void onToggleLibrary() {
+                pendingLibraryToggle = true;
+                vm.toggleSaved();
+            }
+            @Override public void onDownload() { showDownloadGate(); }
+            @Override public void onGoToArtist() {
+                if (currentAlbum.getArtist() != null && currentAlbum.getArtist().getArtistId() != null) {
+                    NavHelper.openArtist(requireContext(), currentAlbum.getArtist().getArtistId());
+                }
+            }
+        });
+        sheet.show(getChildFragmentManager(), "album_menu");
     }
 
     private void observeViewModel() {
@@ -143,6 +171,16 @@ public class AlbumDetailFragment extends BaseDetailFragment {
         vm.tracks().observe(getViewLifecycleOwner(), data -> {
             renderTracks(data);
             if (data != null) hideShimmer();
+        });
+        vm.saved().observe(getViewLifecycleOwner(), saved -> {
+            boolean isSaved = Boolean.TRUE.equals(saved);
+            updateLibraryUi(isSaved);
+            if (pendingLibraryToggle) {
+                pendingLibraryToggle = false;
+                Snackbar.make(b.getRoot(),
+                    isSaved ? R.string.album_added_to_library : R.string.album_removed_from_library,
+                    Snackbar.LENGTH_SHORT).show();
+            }
         });
         vm.errorEvent().observe(getViewLifecycleOwner(), e -> e.consume(msg -> {
             hideShimmer();
@@ -159,6 +197,7 @@ public class AlbumDetailFragment extends BaseDetailFragment {
 
     private void renderAlbum(Album a) {
         if (a == null) return;
+        currentAlbum = a;
         b.collapsingToolbar.setTitle(a.getTitle());
         if (a.getCoverUrl() != null && !a.getCoverUrl().isEmpty()) {
             Glide.with(this)
